@@ -3,8 +3,6 @@
 // See http://www.topografix.com/gpx.asp.
 package gpx
 
-// TODO Extensions
-
 import (
 	"encoding/xml"
 	"strconv"
@@ -26,17 +24,19 @@ type CopyrightType struct {
 	License string `xml:"license,omitempty"`
 }
 
-type ExtensionsType []byte
+type ExtensionsType struct {
+	XML []byte `xml:",innerxml"`
+}
 
 type GPXType struct {
-	XMLName  string        `xml:"gpx"`
-	Version  string        `xml:"version,attr"`
-	Creator  string        `xml:"creator,attr"`
-	Metadata *MetadataType `xml:"metadata,omitempty"`
-	Wpt      []*WptType    `xml:"wpt,omitempty"`
-	Rte      []*RteType    `xml:"rte,omitempty"`
-	Trk      []*TrkType    `xml:"trk,omitempty"`
-	// Extensions
+	XMLName    string          `xml:"gpx"`
+	Version    string          `xml:"version,attr"`
+	Creator    string          `xml:"creator,attr"`
+	Metadata   *MetadataType   `xml:"metadata,omitempty"`
+	Wpt        []*WptType      `xml:"wpt,omitempty"`
+	Rte        []*RteType      `xml:"rte,omitempty"`
+	Trk        []*TrkType      `xml:"trk,omitempty"`
+	Extensions *ExtensionsType `xml:"extensions"`
 }
 
 type LinkType struct {
@@ -52,44 +52,44 @@ type PersonType struct {
 }
 
 type MetadataType struct {
-	Name      string         `xml:"name,omitempty"`
-	Desc      string         `xml:"desc,omitempty"`
-	Author    *PersonType    `xml:"author,omitempty"`
-	Copyright *CopyrightType `xml:"copyright,omitempty"`
-	Link      []*LinkType    `xml:"link,omitempty"`
-	Time      time.Time      `xml:"time,omitempty"`
-	Keywords  string         `xml:"keywords,omitempty"`
-	Bounds    *BoundsType    `xml:"bounds,omitempty"`
-	// Extensions
+	Name       string          `xml:"name,omitempty"`
+	Desc       string          `xml:"desc,omitempty"`
+	Author     *PersonType     `xml:"author,omitempty"`
+	Copyright  *CopyrightType  `xml:"copyright,omitempty"`
+	Link       []*LinkType     `xml:"link,omitempty"`
+	Time       time.Time       `xml:"time,omitempty"`
+	Keywords   string          `xml:"keywords,omitempty"`
+	Bounds     *BoundsType     `xml:"bounds,omitempty"`
+	Extensions *ExtensionsType `xml:"extensions"`
 }
 
 type RteType struct {
-	Name   string      `xml:"name,omitempty"`
-	Cmt    string      `xml:"cmt,omitempty"`
-	Desc   string      `xml:"desc,omitempty"`
-	Src    string      `xml:"src,omitempty"`
-	Link   []*LinkType `xml:"link,omitempty"`
-	Number int         `xml:"number,omitempty"`
-	Type   string      `xml:"type,omitempty"`
-	// Extensions
-	RtePt []*WptType `xml:"rtept,omitempty"`
+	Name       string          `xml:"name,omitempty"`
+	Cmt        string          `xml:"cmt,omitempty"`
+	Desc       string          `xml:"desc,omitempty"`
+	Src        string          `xml:"src,omitempty"`
+	Link       []*LinkType     `xml:"link,omitempty"`
+	Number     int             `xml:"number,omitempty"`
+	Type       string          `xml:"type,omitempty"`
+	Extensions *ExtensionsType `xml:"extensions"`
+	RtePt      []*WptType      `xml:"rtept,omitempty"`
 }
 
 type TrkSegType struct {
-	TrkPt []*WptType `xml:"trkpt,omitempty"`
-	// Extensions
+	TrkPt      []*WptType      `xml:"trkpt,omitempty"`
+	Extensions *ExtensionsType `xml:"extensions"`
 }
 
 type TrkType struct {
-	Name   string      `xml:"name,omitempty"`
-	Cmt    string      `xml:"cmt,omitempty"`
-	Desc   string      `xml:"desc,omitempty"`
-	Src    string      `xml:"src,omitempty"`
-	Link   []*LinkType `xml:"link,omitempty"`
-	Number int         `xml:"number,omitempty"`
-	Type   string      `xml:"type,omitempty"`
-	// Extensions
-	TrkSeg []*TrkSegType `xml:"trkseg,omitempty"`
+	Name       string          `xml:"name,omitempty"`
+	Cmt        string          `xml:"cmt,omitempty"`
+	Desc       string          `xml:"desc,omitempty"`
+	Src        string          `xml:"src,omitempty"`
+	Link       []*LinkType     `xml:"link,omitempty"`
+	Number     int             `xml:"number,omitempty"`
+	Type       string          `xml:"type,omitempty"`
+	Extensions *ExtensionsType `xml:"extensions"`
+	TrkSeg     []*TrkSegType   `xml:"trkseg,omitempty"`
 }
 
 type WptType struct {
@@ -113,7 +113,7 @@ type WptType struct {
 	PDOP         float64
 	AgeOfGPSData float64
 	DGPSID       []int
-	// Extensions
+	Extensions   *ExtensionsType
 }
 
 func emitIntElement(e *xml.Encoder, localName string, value int) error {
@@ -218,7 +218,7 @@ func (w *WptType) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 			return err
 		}
 	}
-	// Extensions
+	// FIXME Encode extensions
 	return e.EncodeToken(start.End())
 }
 
@@ -265,27 +265,27 @@ func (g *GPXType) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 
 func (w *WptType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var e struct {
-		Lat          float64     `xml:"lat,attr"`
-		Lon          float64     `xml:"lon,attr"`
-		Ele          float64     `xml:"ele"`
-		Time         string      `xml:"time"`
-		MagVar       float64     `xml:"magvar"`
-		GeoidHeight  float64     `xml:"geoidheight"`
-		Name         string      `xml:"name"`
-		Cmt          string      `xml:"cmt"`
-		Desc         string      `xml:"desc"`
-		Src          string      `xml:"src"`
-		Link         []*LinkType `xml:"link"`
-		Sym          string      `xml:"sym"`
-		Type         string      `xml:"type"`
-		Fix          string      `xml:"fix"`
-		Sat          int         `xml:"sat"`
-		HDOP         float64     `xml:"hdop"`
-		VDOP         float64     `xml:"vdop"`
-		PDOP         float64     `xml:"pdop"`
-		AgeOfGPSData float64     `xml:"ageofgpsdata"`
-		DGPSID       []int       `xml:"dgpsid"`
-		// Extensions
+		Lat          float64         `xml:"lat,attr"`
+		Lon          float64         `xml:"lon,attr"`
+		Ele          float64         `xml:"ele"`
+		Time         string          `xml:"time"`
+		MagVar       float64         `xml:"magvar"`
+		GeoidHeight  float64         `xml:"geoidheight"`
+		Name         string          `xml:"name"`
+		Cmt          string          `xml:"cmt"`
+		Desc         string          `xml:"desc"`
+		Src          string          `xml:"src"`
+		Link         []*LinkType     `xml:"link"`
+		Sym          string          `xml:"sym"`
+		Type         string          `xml:"type"`
+		Fix          string          `xml:"fix"`
+		Sat          int             `xml:"sat"`
+		HDOP         float64         `xml:"hdop"`
+		VDOP         float64         `xml:"vdop"`
+		PDOP         float64         `xml:"pdop"`
+		AgeOfGPSData float64         `xml:"ageofgpsdata"`
+		DGPSID       []int           `xml:"dgpsid"`
+		Extensions   *ExtensionsType `xml:"extensions"`
 	}
 	if err := d.DecodeElement(&e, &start); err != nil {
 		return err
@@ -310,7 +310,7 @@ func (w *WptType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 		PDOP:         e.PDOP,
 		AgeOfGPSData: e.AgeOfGPSData,
 		DGPSID:       e.DGPSID,
-		// Extensions
+		Extensions:   e.Extensions,
 	}
 	if e.Time != "" {
 		t, err := time.ParseInLocation(timeLayout, e.Time, time.UTC)
