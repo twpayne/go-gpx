@@ -66,6 +66,7 @@ func TestWpt(t *testing.T) {
 				"\t<vdop>5.5</vdop>\n" +
 				"\t<pdop>6.6</pdop>\n" +
 				"\t<ageofgpsdata>7.7</ageofgpsdata>\n" +
+				"\t<dgpsid>8</dgpsid>\n" +
 				"</wpt>",
 			wpt: &WptType{
 				Lat:         42.438878,
@@ -93,6 +94,7 @@ func TestWpt(t *testing.T) {
 				VDOP:         5.5,
 				PDOP:         6.6,
 				AgeOfGPSData: 7.7,
+				DGPSID:       []int{8},
 			},
 		},
 	} {

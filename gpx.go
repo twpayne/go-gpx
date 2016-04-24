@@ -3,7 +3,6 @@
 // See http://www.topografix.com/gpx.asp.
 package gpx
 
-// TODO DGPSID
 // TODO Extensions
 
 import (
@@ -113,7 +112,7 @@ type WptType struct {
 	VDOP         float64
 	PDOP         float64
 	AgeOfGPSData float64
-	// DGPSID
+	DGPSID       []int
 	// Extensions
 }
 
@@ -214,7 +213,11 @@ func (w *WptType) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	if err := maybeEmitFloatElement(e, "ageofgpsdata", w.AgeOfGPSData); err != nil {
 		return err
 	}
-	// DGPSID
+	for _, dgpsid := range w.DGPSID {
+		if err := emitIntElement(e, "dgpsid", dgpsid); err != nil {
+			return err
+		}
+	}
 	// Extensions
 	return e.EncodeToken(start.End())
 }
@@ -281,7 +284,7 @@ func (w *WptType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 		VDOP         float64     `xml:"vdop"`
 		PDOP         float64     `xml:"pdop"`
 		AgeOfGPSData float64     `xml:"ageofgpsdata"`
-		// DGPSID
+		DGPSID       []int       `xml:"dgpsid"`
 		// Extensions
 	}
 	if err := d.DecodeElement(&e, &start); err != nil {
@@ -306,7 +309,7 @@ func (w *WptType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 		VDOP:         e.VDOP,
 		PDOP:         e.PDOP,
 		AgeOfGPSData: e.AgeOfGPSData,
-		// DGPSID
+		DGPSID:       e.DGPSID,
 		// Extensions
 	}
 	if e.Time != "" {
