@@ -30,6 +30,7 @@ type CopyrightType struct {
 type ExtensionsType []byte
 
 type GPXType struct {
+	XMLName  string        `xml:"gpx"`
 	Version  string        `xml:"version,attr"`
 	Creator  string        `xml:"creator,attr"`
 	Metadata *MetadataType `xml:"metadata,omitempty"`
