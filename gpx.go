@@ -6,6 +6,7 @@ package gpx
 import (
 	"encoding/xml"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -236,6 +237,7 @@ func (w *WptType) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 
 // MarshalXML implements xml.Marshaler.MarshalXML.
 func (t *T) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	baseURL := "http://www.topografix.com/GPX/" + strings.Join(strings.Split(t.Version, "."), "/")
 	start = xml.StartElement{
 		Name: xml.Name{Local: "gpx"},
 		Attr: []xml.Attr{
@@ -253,11 +255,11 @@ func (t *T) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 			},
 			xml.Attr{
 				Name:  xml.Name{Local: "xmlns"},
-				Value: "http://www.topografix.com/GPX/1/0",
+				Value: baseURL,
 			},
 			xml.Attr{
 				Name:  xml.Name{Local: "xsi:schemaLocation"},
-				Value: "http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd",
+				Value: baseURL + " " + baseURL + "/gpx.xsd",
 			},
 		},
 	}
