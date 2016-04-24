@@ -1,4 +1,5 @@
-// Package gpx provides convenience types for reading and writing GPX files.
+// Package gpx provides convenience types for reading and writing GPX
+// documents.
 // See http://www.topografix.com/gpx.asp.
 package gpx
 
