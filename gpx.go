@@ -31,8 +31,8 @@ type ExtensionsType struct {
 	XML []byte `xml:",innerxml"`
 }
 
-// A GPXType is a gpxType.
-type GPXType struct {
+// A T is a gpxType.
+type T struct {
 	XMLName    string          `xml:"gpx"`
 	Version    string          `xml:"version,attr"`
 	Creator    string          `xml:"creator,attr"`
@@ -235,17 +235,17 @@ func (w *WptType) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 }
 
 // MarshalXML implements xml.Marshaler.MarshalXML.
-func (g *GPXType) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+func (t *T) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	start = xml.StartElement{
 		Name: xml.Name{Local: "gpx"},
 		Attr: []xml.Attr{
 			xml.Attr{
 				Name:  xml.Name{Local: "version"},
-				Value: g.Version,
+				Value: t.Version,
 			},
 			xml.Attr{
 				Name:  xml.Name{Local: "creator"},
-				Value: g.Creator,
+				Value: t.Creator,
 			},
 			xml.Attr{
 				Name:  xml.Name{Local: "xmlns:xsi"},
@@ -264,13 +264,13 @@ func (g *GPXType) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	if err := e.EncodeToken(start); err != nil {
 		return err
 	}
-	if err := e.EncodeElement(g.Wpt, xml.StartElement{Name: xml.Name{Local: "wpt"}}); err != nil {
+	if err := e.EncodeElement(t.Wpt, xml.StartElement{Name: xml.Name{Local: "wpt"}}); err != nil {
 		return err
 	}
-	if err := e.EncodeElement(g.Rte, xml.StartElement{Name: xml.Name{Local: "rte"}}); err != nil {
+	if err := e.EncodeElement(t.Rte, xml.StartElement{Name: xml.Name{Local: "rte"}}); err != nil {
 		return err
 	}
-	if err := e.EncodeElement(g.Trk, xml.StartElement{Name: xml.Name{Local: "trk"}}); err != nil {
+	if err := e.EncodeElement(t.Trk, xml.StartElement{Name: xml.Name{Local: "trk"}}); err != nil {
 		return err
 	}
 	return e.EncodeToken(start.End())

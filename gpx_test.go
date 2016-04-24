@@ -123,7 +123,7 @@ func TestWpt(t *testing.T) {
 func TestRoundTrip(t *testing.T) {
 	for _, tc := range []struct {
 		data string
-		gpx  *GPXType
+		gpx  *T
 	}{
 		{
 			data: "<gpx" +
@@ -133,7 +133,7 @@ func TestRoundTrip(t *testing.T) {
 				" xmlns=\"http://www.topografix.com/GPX/1/0\"" +
 				" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd\">" +
 				"</gpx>",
-			gpx: &GPXType{
+			gpx: &T{
 				Version: "1.0",
 				Creator: "ExpertGPS 1.1 - http://www.topografix.com",
 			},
@@ -154,7 +154,7 @@ func TestRoundTrip(t *testing.T) {
 				"\t\t<type>Crossing</type>\n" +
 				"\t</wpt>\n" +
 				"</gpx>",
-			gpx: &GPXType{
+			gpx: &T{
 				Version: "1.0",
 				Creator: "ExpertGPS 1.1 - http://www.topografix.com",
 				Wpt: []*WptType{
@@ -201,7 +201,7 @@ func TestRoundTrip(t *testing.T) {
 				"\t\t</rtept>\n" +
 				"\t</rte>\n" +
 				"</gpx>",
-			gpx: &GPXType{
+			gpx: &T{
 				Version: "1.0",
 				Creator: "ExpertGPS 1.1 - http://www.topografix.com",
 				Rte: []*RteType{
@@ -237,12 +237,12 @@ func TestRoundTrip(t *testing.T) {
 			},
 		},
 	} {
-		var gotGPX GPXType
-		if err := xml.Unmarshal([]byte(tc.data), &gotGPX); err != nil {
-			t.Errorf("xml.Unmarshal([]byte(%q), &gotGPX) == %v, want nil", tc.data, err)
+		var got T
+		if err := xml.Unmarshal([]byte(tc.data), &got); err != nil {
+			t.Errorf("xml.Unmarshal([]byte(%q), &got) == %v, want nil", tc.data, err)
 		}
-		if diff, equal := messagediff.PrettyDiff(tc.gpx, &gotGPX); !equal {
-			t.Errorf("xml.Unmarshal([]byte(%q), &gotGPX); got == %#v, diff\n%s", tc.data, gotGPX, diff)
+		if diff, equal := messagediff.PrettyDiff(tc.gpx, &got); !equal {
+			t.Errorf("xml.Unmarshal([]byte(%q), &got); got == %#v, diff\n%s", tc.data, got, diff)
 		}
 		var b bytes.Buffer
 		e := xml.NewEncoder(&b)
@@ -258,7 +258,7 @@ func TestRoundTrip(t *testing.T) {
 }
 
 func TestParseFellsLoop(t *testing.T) {
-	var got GPXType
+	var got T
 	if err := xml.Unmarshal(fellsLoopData, &got); err != nil {
 		t.Errorf("xml.Unmarshal(fellsLoopData, &got) == %v, want nil", err)
 	}
