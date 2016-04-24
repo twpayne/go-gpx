@@ -118,6 +118,143 @@ func TestWpt(t *testing.T) {
 	}
 }
 
+func TestRoundTrip(t *testing.T) {
+	for _, tc := range []struct {
+		data string
+		gpx  *GPXType
+	}{
+		{
+			data: "<gpx" +
+				" version=\"1.0\"" +
+				" creator=\"ExpertGPS 1.1 - http://www.topografix.com\"" +
+				" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
+				" xmlns=\"http://www.topografix.com/GPX/1/0\"" +
+				" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd\">" +
+				"</gpx>",
+			gpx: &GPXType{
+				Version: "1.0",
+				Creator: "ExpertGPS 1.1 - http://www.topografix.com",
+			},
+		},
+		{
+			data: "<gpx" +
+				" version=\"1.0\"" +
+				" creator=\"ExpertGPS 1.1 - http://www.topografix.com\"" +
+				" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
+				" xmlns=\"http://www.topografix.com/GPX/1/0\"" +
+				" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd\">\n" +
+				"\t<wpt lat=\"42.438878\" lon=\"-71.119277\">\n" +
+				"\t\t<ele>44.586548</ele>\n" +
+				"\t\t<time>2001-11-28T21:05:28Z</time>\n" +
+				"\t\t<name>5066</name>\n" +
+				"\t\t<desc>5066</desc>\n" +
+				"\t\t<sym>Crossing</sym>\n" +
+				"\t\t<type>Crossing</type>\n" +
+				"\t</wpt>\n" +
+				"</gpx>",
+			gpx: &GPXType{
+				Version: "1.0",
+				Creator: "ExpertGPS 1.1 - http://www.topografix.com",
+				Wpt: []*WptType{
+					&WptType{
+						Lat:  42.438878,
+						Lon:  -71.119277,
+						Ele:  44.586548,
+						Time: time.Date(2001, 11, 28, 21, 5, 28, 0, time.UTC),
+						Name: "5066",
+						Desc: "5066",
+						Sym:  "Crossing",
+						Type: "Crossing",
+					},
+				},
+			},
+		},
+		{
+			data: "<gpx" +
+				" version=\"1.0\"" +
+				" creator=\"ExpertGPS 1.1 - http://www.topografix.com\"" +
+				" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
+				" xmlns=\"http://www.topografix.com/GPX/1/0\"" +
+				" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd\">\n" +
+				"\t<rte>\n" +
+				"\t\t<name>BELLEVUE</name>\n" +
+				"\t\t<desc>Bike Loop Bellevue</desc>\n" +
+				"\t\t<number>1</number>\n" +
+				"\t\t<rtept lat=\"42.43095\" lon=\"-71.107628\">\n" +
+				"\t\t\t<ele>23.4696</ele>\n" +
+				"\t\t\t<time>2001-06-02T00:18:15Z</time>\n" +
+				"\t\t\t<name>BELLEVUE</name>\n" +
+				"\t\t\t<cmt>BELLEVUE</cmt>\n" +
+				"\t\t\t<desc>Bellevue Parking Lot</desc>\n" +
+				"\t\t\t<sym>Parking Area</sym>\n" +
+				"\t\t\t<type>Parking</type>\n" +
+				"\t\t</rtept>\n" +
+				"\t\t<rtept lat=\"42.43124\" lon=\"-71.109236\">\n" +
+				"\t\t\t<ele>26.56189</ele>\n" +
+				"\t\t\t<time>2001-11-07T23:53:41Z</time>\n" +
+				"\t\t\t<name>GATE6</name>\n" +
+				"\t\t\t<desc>Gate 6</desc>\n" +
+				"\t\t\t<sym>Trailhead</sym>\n" +
+				"\t\t\t<type>Trail Head</type>\n" +
+				"\t\t</rtept>\n" +
+				"\t</rte>\n" +
+				"</gpx>",
+			gpx: &GPXType{
+				Version: "1.0",
+				Creator: "ExpertGPS 1.1 - http://www.topografix.com",
+				Rte: []*RteType{
+					&RteType{
+						Name:   "BELLEVUE",
+						Desc:   "Bike Loop Bellevue",
+						Number: 1,
+						RtePt: []*WptType{
+							&WptType{
+								Lat:  42.430950,
+								Lon:  -71.107628,
+								Ele:  23.469600,
+								Time: time.Date(2001, 6, 2, 0, 18, 15, 0, time.UTC),
+								Name: "BELLEVUE",
+								Cmt:  "BELLEVUE",
+								Desc: "Bellevue Parking Lot",
+								Sym:  "Parking Area",
+								Type: "Parking",
+							},
+							&WptType{
+								Lat:  42.431240,
+								Lon:  -71.109236,
+								Ele:  26.561890,
+								Time: time.Date(2001, 11, 7, 23, 53, 41, 0, time.UTC),
+								Name: "GATE6",
+								Desc: "Gate 6",
+								Sym:  "Trailhead",
+								Type: "Trail Head",
+							},
+						},
+					},
+				},
+			},
+		},
+	} {
+		var gotGPX GPXType
+		if err := xml.Unmarshal([]byte(tc.data), &gotGPX); err != nil {
+			t.Errorf("xml.Unmarshal([]byte(%q), &gotGPX) == %v, want nil", tc.data, err)
+		}
+		if diff, equal := messagediff.PrettyDiff(tc.gpx, &gotGPX); !equal {
+			t.Errorf("xml.Unmarshal([]byte(%q), &gotGPX); got == %#v, diff\n%s", tc.data, gotGPX, diff)
+		}
+		var b bytes.Buffer
+		e := xml.NewEncoder(&b)
+		e.Indent("", "\t")
+		start := xml.StartElement{Name: xml.Name{Local: "gpx"}}
+		if err := e.EncodeElement(tc.gpx, start); err != nil {
+			t.Errorf("e.EncodeElement(%#v, %#v) == _, %v, want _, nil", tc.gpx, start, err)
+		}
+		if diff, equal := messagediff.PrettyDiff(strings.Split(tc.data, "\n"), strings.Split(b.String(), "\n")); !equal {
+			t.Errorf("xml.Marshal(%#v) ==\n%s\nwant\n%s\ndiff\n%s", tc.gpx, b.String(), tc.data, diff)
+		}
+	}
+}
+
 func TestParseFellsLoop(t *testing.T) {
 	var got GPXType
 	if err := xml.Unmarshal(fellsLoopData, &got); err != nil {

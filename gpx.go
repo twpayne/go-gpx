@@ -219,6 +219,47 @@ func (w *WptType) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	return e.EncodeToken(start.End())
 }
 
+func (g *GPXType) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	start = xml.StartElement{
+		Name: xml.Name{Local: "gpx"},
+		Attr: []xml.Attr{
+			xml.Attr{
+				Name:  xml.Name{Local: "version"},
+				Value: g.Version,
+			},
+			xml.Attr{
+				Name:  xml.Name{Local: "creator"},
+				Value: g.Creator,
+			},
+			xml.Attr{
+				Name:  xml.Name{Local: "xmlns:xsi"},
+				Value: "http://www.w3.org/2001/XMLSchema-instance",
+			},
+			xml.Attr{
+				Name:  xml.Name{Local: "xmlns"},
+				Value: "http://www.topografix.com/GPX/1/0",
+			},
+			xml.Attr{
+				Name:  xml.Name{Local: "xsi:schemaLocation"},
+				Value: "http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd",
+			},
+		},
+	}
+	if err := e.EncodeToken(start); err != nil {
+		return err
+	}
+	if err := e.EncodeElement(g.Wpt, xml.StartElement{Name: xml.Name{Local: "wpt"}}); err != nil {
+		return err
+	}
+	if err := e.EncodeElement(g.Rte, xml.StartElement{Name: xml.Name{Local: "rte"}}); err != nil {
+		return err
+	}
+	if err := e.EncodeElement(g.Trk, xml.StartElement{Name: xml.Name{Local: "trk"}}); err != nil {
+		return err
+	}
+	return e.EncodeToken(start.End())
+}
+
 func (w *WptType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var e struct {
 		Lat          float64     `xml:"lat,attr"`
