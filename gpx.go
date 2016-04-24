@@ -11,6 +11,7 @@ import (
 
 const timeLayout = "2006-01-02T15:04:05.999999999Z"
 
+// A BoundsType is a boundsType.
 type BoundsType struct {
 	MinLat float64 `xml:"minlat,attr"`
 	MinLon float64 `xml:"minlon,attr"`
@@ -18,16 +19,19 @@ type BoundsType struct {
 	MaxLon float64 `xml:"maxlon,attr"`
 }
 
+// A CopyrightType is a copyrightType.
 type CopyrightType struct {
 	Author  string `xml:"author,attr"`
 	Year    int    `xml:"year,omitempty"`
 	License string `xml:"license,omitempty"`
 }
 
+// An ExtensionsType contains elements from another schema.
 type ExtensionsType struct {
 	XML []byte `xml:",innerxml"`
 }
 
+// A GPXType is a gpxType.
 type GPXType struct {
 	XMLName    string          `xml:"gpx"`
 	Version    string          `xml:"version,attr"`
@@ -39,18 +43,21 @@ type GPXType struct {
 	Extensions *ExtensionsType `xml:"extensions"`
 }
 
+// A LinkType is a linkType.
 type LinkType struct {
 	HREF string `xml:"href,attr"`
 	Text string `xml:"text,omitempty"`
 	Type string `xml:"type,omitempty"`
 }
 
+// A PersonType is a personType.
 type PersonType struct {
 	Name  string    `xml:"name,omitempty"`
 	Email string    `xml:"email,omitempty"`
 	Link  *LinkType `xml:"link,omitempty"`
 }
 
+// A MetadataType is a metadataType.
 type MetadataType struct {
 	Name       string          `xml:"name,omitempty"`
 	Desc       string          `xml:"desc,omitempty"`
@@ -63,6 +70,7 @@ type MetadataType struct {
 	Extensions *ExtensionsType `xml:"extensions"`
 }
 
+// A RteType is a rteType.
 type RteType struct {
 	Name       string          `xml:"name,omitempty"`
 	Cmt        string          `xml:"cmt,omitempty"`
@@ -75,11 +83,13 @@ type RteType struct {
 	RtePt      []*WptType      `xml:"rtept,omitempty"`
 }
 
+// A TrkSegType is a trkSegType.
 type TrkSegType struct {
 	TrkPt      []*WptType      `xml:"trkpt,omitempty"`
 	Extensions *ExtensionsType `xml:"extensions"`
 }
 
+// A TrkType is a trkType.
 type TrkType struct {
 	Name       string          `xml:"name,omitempty"`
 	Cmt        string          `xml:"cmt,omitempty"`
@@ -92,6 +102,7 @@ type TrkType struct {
 	TrkSeg     []*TrkSegType   `xml:"trkseg,omitempty"`
 }
 
+// A WptType is a wptType.
 type WptType struct {
 	Lat          float64
 	Lon          float64
@@ -145,6 +156,7 @@ func maybeEmitStringElement(e *xml.Encoder, localName, value string) error {
 	return emitStringElement(e, localName, value)
 }
 
+// MarshalXML implements xml.Marshaler.MarshalXML.
 func (w *WptType) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	latAttr := xml.Attr{
 		Name:  xml.Name{Local: "lat"},
@@ -222,6 +234,7 @@ func (w *WptType) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	return e.EncodeToken(start.End())
 }
 
+// MarshalXML implements xml.Marshaler.MarshalXML.
 func (g *GPXType) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	start = xml.StartElement{
 		Name: xml.Name{Local: "gpx"},
@@ -263,6 +276,7 @@ func (g *GPXType) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	return e.EncodeToken(start.End())
 }
 
+// UnmarshalXML implements xml.Unmarshaler.UnmarshalXML.
 func (w *WptType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var e struct {
 		Lat          float64         `xml:"lat,attr"`
