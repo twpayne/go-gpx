@@ -321,8 +321,3 @@ func (w *WptType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	}
 	return nil
 }
-
-var (
-	_ xml.Marshaler   = &WptType{}
-	_ xml.Unmarshaler = &WptType{}
-)
