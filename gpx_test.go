@@ -244,11 +244,9 @@ func TestRoundTrip(t *testing.T) {
 		if diff, equal := messagediff.PrettyDiff(tc.gpx, &got); !equal {
 			t.Errorf("xml.Unmarshal([]byte(%q), &got); got == %#v, diff\n%s", tc.data, got, diff)
 		}
-		var b bytes.Buffer
-		e := xml.NewEncoder(&b)
-		e.Indent("", "\t")
-		if err := e.EncodeElement(tc.gpx, StartElement); err != nil {
-			t.Errorf("e.EncodeElement(%#v, %#v) == _, %v, want _, nil", tc.gpx, StartElement, err)
+		b := &bytes.Buffer{}
+		if err := tc.gpx.WriteIndent(b, "", "\t"); err != nil {
+			t.Errorf("%#v.WriteIndent(...) == %v, want nil", tc.gpx, err)
 		}
 		if diff, equal := messagediff.PrettyDiff(strings.Split(tc.data, "\n"), strings.Split(b.String(), "\n")); !equal {
 			t.Errorf("xml.Marshal(%#v) ==\n%s\nwant\n%s\ndiff\n%s", tc.gpx, b.String(), tc.data, diff)

@@ -5,6 +5,7 @@ package gpx
 
 import (
 	"encoding/xml"
+	"io"
 	"strconv"
 	"strings"
 	"time"
@@ -160,6 +161,18 @@ func maybeEmitStringElement(e *xml.Encoder, localName, value string) error {
 		return nil
 	}
 	return emitStringElement(e, localName, value)
+}
+
+// Write writes t to w.
+func (t *T) Write(w io.Writer) error {
+	return xml.NewEncoder(w).EncodeElement(t, StartElement)
+}
+
+// WriteIndent writes t to w.
+func (t *T) WriteIndent(w io.Writer, prefix, indent string) error {
+	e := xml.NewEncoder(w)
+	e.Indent(prefix, indent)
+	return e.EncodeElement(t, StartElement)
 }
 
 // MarshalXML implements xml.Marshaler.MarshalXML.
