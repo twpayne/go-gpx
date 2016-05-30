@@ -240,49 +240,6 @@ func (w *WptType) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	return e.EncodeToken(start.End())
 }
 
-// MarshalXML implements xml.Marshaler.MarshalXML.
-func (t *T) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
-	baseURL := "http://www.topografix.com/GPX/" + strings.Join(strings.Split(t.Version, "."), "/")
-	start = xml.StartElement{
-		Name: xml.Name{Local: "gpx"},
-		Attr: []xml.Attr{
-			xml.Attr{
-				Name:  xml.Name{Local: "version"},
-				Value: t.Version,
-			},
-			xml.Attr{
-				Name:  xml.Name{Local: "creator"},
-				Value: t.Creator,
-			},
-			xml.Attr{
-				Name:  xml.Name{Local: "xmlns:xsi"},
-				Value: "http://www.w3.org/2001/XMLSchema-instance",
-			},
-			xml.Attr{
-				Name:  xml.Name{Local: "xmlns"},
-				Value: baseURL,
-			},
-			xml.Attr{
-				Name:  xml.Name{Local: "xsi:schemaLocation"},
-				Value: baseURL + " " + baseURL + "/gpx.xsd",
-			},
-		},
-	}
-	if err := e.EncodeToken(start); err != nil {
-		return err
-	}
-	if err := e.EncodeElement(t.Wpt, xml.StartElement{Name: xml.Name{Local: "wpt"}}); err != nil {
-		return err
-	}
-	if err := e.EncodeElement(t.Rte, xml.StartElement{Name: xml.Name{Local: "rte"}}); err != nil {
-		return err
-	}
-	if err := e.EncodeElement(t.Trk, xml.StartElement{Name: xml.Name{Local: "trk"}}); err != nil {
-		return err
-	}
-	return e.EncodeToken(start.End())
-}
-
 // UnmarshalXML implements xml.Unmarshaler.UnmarshalXML.
 func (w *WptType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var e struct {
@@ -341,4 +298,47 @@ func (w *WptType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 		w.Time = t
 	}
 	return nil
+}
+
+// MarshalXML implements xml.Marshaler.MarshalXML.
+func (t *T) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	baseURL := "http://www.topografix.com/GPX/" + strings.Join(strings.Split(t.Version, "."), "/")
+	start = xml.StartElement{
+		Name: xml.Name{Local: "gpx"},
+		Attr: []xml.Attr{
+			xml.Attr{
+				Name:  xml.Name{Local: "version"},
+				Value: t.Version,
+			},
+			xml.Attr{
+				Name:  xml.Name{Local: "creator"},
+				Value: t.Creator,
+			},
+			xml.Attr{
+				Name:  xml.Name{Local: "xmlns:xsi"},
+				Value: "http://www.w3.org/2001/XMLSchema-instance",
+			},
+			xml.Attr{
+				Name:  xml.Name{Local: "xmlns"},
+				Value: baseURL,
+			},
+			xml.Attr{
+				Name:  xml.Name{Local: "xsi:schemaLocation"},
+				Value: baseURL + " " + baseURL + "/gpx.xsd",
+			},
+		},
+	}
+	if err := e.EncodeToken(start); err != nil {
+		return err
+	}
+	if err := e.EncodeElement(t.Wpt, xml.StartElement{Name: xml.Name{Local: "wpt"}}); err != nil {
+		return err
+	}
+	if err := e.EncodeElement(t.Rte, xml.StartElement{Name: xml.Name{Local: "rte"}}); err != nil {
+		return err
+	}
+	if err := e.EncodeElement(t.Trk, xml.StartElement{Name: xml.Name{Local: "trk"}}); err != nil {
+		return err
+	}
+	return e.EncodeToken(start.End())
 }
