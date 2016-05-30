@@ -12,6 +12,11 @@ import (
 
 const timeLayout = "2006-01-02T15:04:05.999999999Z"
 
+// StartElement is the XML start element for GPX files.
+var StartElement = xml.StartElement{
+	Name: xml.Name{Local: "gpx"},
+}
+
 // A BoundsType is a boundsType.
 type BoundsType struct {
 	MinLat float64 `xml:"minlat,attr"`

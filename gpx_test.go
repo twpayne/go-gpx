@@ -247,9 +247,8 @@ func TestRoundTrip(t *testing.T) {
 		var b bytes.Buffer
 		e := xml.NewEncoder(&b)
 		e.Indent("", "\t")
-		start := xml.StartElement{Name: xml.Name{Local: "gpx"}}
-		if err := e.EncodeElement(tc.gpx, start); err != nil {
-			t.Errorf("e.EncodeElement(%#v, %#v) == _, %v, want _, nil", tc.gpx, start, err)
+		if err := e.EncodeElement(tc.gpx, StartElement); err != nil {
+			t.Errorf("e.EncodeElement(%#v, %#v) == _, %v, want _, nil", tc.gpx, StartElement, err)
 		}
 		if diff, equal := messagediff.PrettyDiff(strings.Split(tc.data, "\n"), strings.Split(b.String(), "\n")); !equal {
 			t.Errorf("xml.Marshal(%#v) ==\n%s\nwant\n%s\ndiff\n%s", tc.gpx, b.String(), tc.data, diff)
