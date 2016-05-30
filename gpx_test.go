@@ -237,11 +237,11 @@ func TestRoundTrip(t *testing.T) {
 			},
 		},
 	} {
-		var got T
-		if err := xml.Unmarshal([]byte(tc.data), &got); err != nil {
-			t.Errorf("xml.Unmarshal([]byte(%q), &got) == %v, want nil", tc.data, err)
+		got, err := Read(bytes.NewBufferString(tc.data))
+		if err != nil {
+			t.Errorf("Read(bytes.NewBuffer(%v)) == _, %v, want _, nil", tc.data, err)
 		}
-		if diff, equal := messagediff.PrettyDiff(tc.gpx, &got); !equal {
+		if diff, equal := messagediff.PrettyDiff(tc.gpx, got); !equal {
 			t.Errorf("xml.Unmarshal([]byte(%q), &got); got == %#v, diff\n%s", tc.data, got, diff)
 		}
 		b := &bytes.Buffer{}
@@ -255,9 +255,8 @@ func TestRoundTrip(t *testing.T) {
 }
 
 func TestParseFellsLoop(t *testing.T) {
-	var got T
-	if err := xml.Unmarshal(fellsLoopData, &got); err != nil {
-		t.Errorf("xml.Unmarshal(fellsLoopData, &got) == %v, want nil", err)
+	if _, err := Read(bytes.NewBuffer(fellsLoopData)); err != nil {
+		t.Errorf("Read(bytes.NewBuffer(fellsLoopData)) == _, %v, want _, nil", err)
 	}
 }
 

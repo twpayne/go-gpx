@@ -163,6 +163,13 @@ func maybeEmitStringElement(e *xml.Encoder, localName, value string) error {
 	return emitStringElement(e, localName, value)
 }
 
+// Read reads a new T from r.
+func Read(r io.Reader) (*T, error) {
+	t := &T{}
+	err := xml.NewDecoder(r).Decode(t)
+	return t, err
+}
+
 // Write writes t to w.
 func (t *T) Write(w io.Writer) error {
 	return xml.NewEncoder(w).EncodeElement(t, StartElement)
