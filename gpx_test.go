@@ -3,12 +3,39 @@ package gpx
 import (
 	"bytes"
 	"encoding/xml"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/d4l3k/messagediff"
 )
+
+func ExampleRead() {
+	r := bytes.NewBufferString("<gpx" +
+		" version=\"1.0\"" +
+		" creator=\"ExpertGPS 1.1 - http://www.topografix.com\"" +
+		" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
+		" xmlns=\"http://www.topografix.com/GPX/1/0\"" +
+		" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd\">\n" +
+		"\t<wpt lat=\"42.438878\" lon=\"-71.119277\">\n" +
+		"\t\t<ele>44.586548</ele>\n" +
+		"\t\t<time>2001-11-28T21:05:28Z</time>\n" +
+		"\t\t<name>5066</name>\n" +
+		"\t\t<desc>5066</desc>\n" +
+		"\t\t<sym>Crossing</sym>\n" +
+		"\t\t<type>Crossing</type>\n" +
+		"\t</wpt>\n" +
+		"</gpx>")
+	t, err := Read(r)
+	if err != nil {
+		fmt.Printf("err == %v", err)
+		return
+	}
+	fmt.Printf("t.Wpt[0] == %+v", t.Wpt[0])
+	// Output:
+	// t.Wpt[0] == &{Lat:42.438878 Lon:-71.119277 Ele:44.586548 Time:2001-11-28 21:05:28 +0000 UTC MagVar:0 GeoidHeight:0 Name:5066 Cmt: Desc:5066 Src: Link:[] Sym:Crossing Type:Crossing Fix: Sat:0 HDOP:0 VDOP:0 PDOP:0 AgeOfGPSData:0 DGPSID:[] Extensions:<nil>}
+}
 
 func TestWpt(t *testing.T) {
 	for _, tc := range []struct {
