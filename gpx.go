@@ -198,7 +198,7 @@ func (t *T) WriteIndent(w io.Writer, prefix, indent string) error {
 	return e.EncodeElement(t, StartElement)
 }
 
-func (w *WptType) appendFlatCoords(layout geom.Layout, flatCoords []float64) []float64 {
+func (w *WptType) appendFlatCoords(flatCoords []float64, layout geom.Layout) []float64 {
 	switch layout {
 	case geom.XY:
 		return append(flatCoords, w.Lon, w.Lat)
@@ -217,7 +217,7 @@ func (w *WptType) appendFlatCoords(layout geom.Layout, flatCoords []float64) []f
 
 // Geom returns w's geometry.
 func (w *WptType) Geom(layout geom.Layout) *geom.Point {
-	return geom.NewPointFlat(layout, w.appendFlatCoords(layout, make([]float64, 0, layout.Stride())))
+	return geom.NewPointFlat(layout, w.appendFlatCoords(make([]float64, 0, layout.Stride()), layout))
 }
 
 // MarshalXML implements xml.Marshaler.MarshalXML.
