@@ -217,7 +217,7 @@ func (w *WptType) appendFlatCoords(layout geom.Layout, flatCoords []float64) []f
 
 // Geom returns w's geometry.
 func (w *WptType) Geom(layout geom.Layout) *geom.Point {
-	return geom.NewPointFlat(layout, w.appendFlatCoords(layout, nil))
+	return geom.NewPointFlat(layout, w.appendFlatCoords(layout, make([]float64, 0, layout.Stride())))
 }
 
 // MarshalXML implements xml.Marshaler.MarshalXML.
