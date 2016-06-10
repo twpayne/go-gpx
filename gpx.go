@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/twpayne/go-geom"
 )
 
 const timeLayout = "2006-01-02T15:04:05.999999999Z"
@@ -194,6 +196,28 @@ func (t *T) WriteIndent(w io.Writer, prefix, indent string) error {
 	e := xml.NewEncoder(w)
 	e.Indent(prefix, indent)
 	return e.EncodeElement(t, StartElement)
+}
+
+func (w *WptType) appendFlatCoords(layout geom.Layout, flatCoords []float64) []float64 {
+	switch layout {
+	case geom.XY:
+		return append(flatCoords, w.Lon, w.Lat)
+	case geom.XYZ:
+		return append(flatCoords, w.Lon, w.Lat, w.Ele)
+	case geom.XYM:
+		return append(flatCoords, w.Lon, w.Lat, timeToM(w.Time))
+	case geom.XYZM:
+		return append(flatCoords, w.Lon, w.Lat, w.Ele, timeToM(w.Time))
+	default:
+		flatCoords = append(flatCoords, w.Lon, w.Lat, w.Ele, timeToM(w.Time))
+		flatCoords = append(flatCoords, make([]float64, int(layout)-4)...)
+		return flatCoords
+	}
+}
+
+// Geom returns w's geometry.
+func (w *WptType) Geom(layout geom.Layout) *geom.Point {
+	return geom.NewPointFlat(layout, w.appendFlatCoords(layout, nil))
 }
 
 // MarshalXML implements xml.Marshaler.MarshalXML.

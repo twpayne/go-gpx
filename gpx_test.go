@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/d4l3k/messagediff"
+	"github.com/twpayne/go-geom"
 )
 
 func ExampleRead() {
@@ -75,14 +76,42 @@ func TestWpt(t *testing.T) {
 	for _, tc := range []struct {
 		data          string
 		wpt           *WptType
+		layout        geom.Layout
+		g             *geom.Point
 		noTestMarshal bool
 	}{
 		{
-			data: `<wpt lat="42.438878" lon="-71.119277"></wpt>`,
+			data: "<wpt lat=\"42.438878\" lon=\"-71.119277\"></wpt>",
 			wpt: &WptType{
 				Lat: 42.438878,
 				Lon: -71.119277,
 			},
+			layout: geom.XY,
+			g:      geom.NewPoint(geom.XY).MustSetCoords([]float64{-71.119277, 42.438878}),
+		},
+		{
+			data: "<wpt lat=\"42.438878\" lon=\"-71.119277\">\n" +
+				"\t<ele>44.586548</ele>\n" +
+				"</wpt>",
+			wpt: &WptType{
+				Lat: 42.438878,
+				Lon: -71.119277,
+				Ele: 44.586548,
+			},
+			layout: geom.XYZ,
+			g:      geom.NewPoint(geom.XYZ).MustSetCoords([]float64{-71.119277, 42.438878, 44.586548}),
+		},
+		{
+			data: "<wpt lat=\"42.438878\" lon=\"-71.119277\">\n" +
+				"\t<time>2001-11-28T21:05:28Z</time>\n" +
+				"</wpt>",
+			wpt: &WptType{
+				Lat:  42.438878,
+				Lon:  -71.119277,
+				Time: time.Date(2001, 11, 28, 21, 5, 28, 0, time.UTC),
+			},
+			layout: geom.XYM,
+			g:      geom.NewPoint(geom.XYM).MustSetCoords([]float64{-71.119277, 42.438878, 1006981528}),
 		},
 		{
 			data: "<wpt lat=\"42.438878\" lon=\"-71.119277\">\n" +
@@ -103,6 +132,8 @@ func TestWpt(t *testing.T) {
 				Sym:  "Crossing",
 				Type: "Crossing",
 			},
+			layout:        geom.XYZM,
+			g:             geom.NewPoint(geom.XYZM).MustSetCoords([]float64{-71.119277, 42.438878, 44.586548, 1006981528}),
 			noTestMarshal: true,
 		},
 		{
@@ -157,6 +188,8 @@ func TestWpt(t *testing.T) {
 				AgeOfGPSData: 7.7,
 				DGPSID:       []int{8},
 			},
+			layout: geom.XYZM,
+			g:      geom.NewPoint(geom.XYZM).MustSetCoords([]float64{-71.119277, 42.438878, 44.586548, 1006981528}),
 		},
 	} {
 		var gotWpt WptType
@@ -165,6 +198,12 @@ func TestWpt(t *testing.T) {
 		}
 		if diff, equal := messagediff.PrettyDiff(tc.wpt, &gotWpt); !equal {
 			t.Errorf("xml.Unmarshal([]byte(%q), &gotWpt); got == %#v, diff\n%s", tc.data, gotWpt, diff)
+		}
+		if tc.layout != geom.NoLayout {
+			gotG := tc.wpt.Geom(tc.layout)
+			if diff, equal := messagediff.PrettyDiff(tc.g, gotG); !equal {
+				t.Errorf("%#v.Geom() == %#v, diff\n%s", tc.wpt, gotG, diff)
+			}
 		}
 		if !tc.noTestMarshal {
 			var b bytes.Buffer
