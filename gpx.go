@@ -134,6 +134,20 @@ type WptType struct {
 	Extensions   *ExtensionsType
 }
 
+func mToTime(m float64) time.Time {
+	if m == 0 {
+		return time.Unix(0, 0)
+	}
+	return time.Unix(int64(m), int64(m*float64(time.Second))%int64(time.Second)).UTC()
+}
+
+func timeToM(t time.Time) float64 {
+	if t.IsZero() {
+		return 0
+	}
+	return float64(t.UnixNano()) / float64(time.Second)
+}
+
 func emitIntElement(e *xml.Encoder, localName string, value int) error {
 	return emitStringElement(e, localName, strconv.FormatInt(int64(value), 10))
 }

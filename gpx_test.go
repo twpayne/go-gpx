@@ -315,6 +315,33 @@ func TestRoundTrip(t *testing.T) {
 	}
 }
 
+func TestTime(t *testing.T) {
+	for _, tc := range []struct {
+		t time.Time
+		m float64
+	}{
+		{
+			t: time.Unix(0, 0),
+			m: 0,
+		},
+		{
+			t: time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
+			m: 946684800,
+		},
+		{
+			t: time.Date(2006, 1, 2, 15, 4, 5, 500000000, time.UTC),
+			m: 1136214245.5,
+		},
+	} {
+		if gotM := timeToM(tc.t); gotM != tc.m {
+			t.Errorf("timeToM(%v) == %v, want %v", tc.t, gotM, tc.m)
+		}
+		if gotT := mToTime(tc.m); gotT != tc.t {
+			t.Errorf("mToTime(%v) == %v, want %v", tc.m, gotT, tc.t)
+		}
+	}
+}
+
 func TestParseFellsLoop(t *testing.T) {
 	if _, err := Read(bytes.NewBuffer(fellsLoopData)); err != nil {
 		t.Errorf("Read(bytes.NewBuffer(fellsLoopData)) == _, %v, want _, nil", err)
