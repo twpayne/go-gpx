@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/twpayne/go-geom"
 )
 
 const timeLayout = "2006-01-02T15:04:05.999999999Z"
@@ -134,6 +136,20 @@ type WptType struct {
 	Extensions   *ExtensionsType
 }
 
+func mToTime(m float64) time.Time {
+	if m == 0 {
+		return time.Unix(0, 0)
+	}
+	return time.Unix(int64(m), int64(m*float64(time.Second))%int64(time.Second)).UTC()
+}
+
+func timeToM(t time.Time) float64 {
+	if t.IsZero() {
+		return 0
+	}
+	return float64(t.UnixNano()) / float64(time.Second)
+}
+
 func emitIntElement(e *xml.Encoder, localName string, value int) error {
 	return emitStringElement(e, localName, strconv.FormatInt(int64(value), 10))
 }
@@ -180,6 +196,130 @@ func (t *T) WriteIndent(w io.Writer, prefix, indent string) error {
 	e := xml.NewEncoder(w)
 	e.Indent(prefix, indent)
 	return e.EncodeElement(t, StartElement)
+}
+
+func (w *WptType) appendFlatCoords(flatCoords []float64, layout geom.Layout) []float64 {
+	switch layout {
+	case geom.XY:
+		return append(flatCoords, w.Lon, w.Lat)
+	case geom.XYZ:
+		return append(flatCoords, w.Lon, w.Lat, w.Ele)
+	case geom.XYM:
+		return append(flatCoords, w.Lon, w.Lat, timeToM(w.Time))
+	case geom.XYZM:
+		return append(flatCoords, w.Lon, w.Lat, w.Ele, timeToM(w.Time))
+	default:
+		flatCoords = append(flatCoords, w.Lon, w.Lat, w.Ele, timeToM(w.Time))
+		flatCoords = append(flatCoords, make([]float64, int(layout)-4)...)
+		return flatCoords
+	}
+}
+
+func newWptTypes(g *geom.LineString) []*WptType {
+	flatCoords := g.FlatCoords()
+	layout := g.Layout()
+	mIndex := layout.MIndex()
+	zIndex := layout.ZIndex()
+	stride := layout.Stride()
+	wpts := make([]*WptType, g.NumCoords())
+	start := 0
+	for i := range wpts {
+		wpt := &WptType{
+			Lat: flatCoords[start+1],
+			Lon: flatCoords[start],
+		}
+		if zIndex != -1 {
+			wpt.Ele = flatCoords[start+zIndex]
+		}
+		if mIndex != -1 {
+			wpt.Time = mToTime(flatCoords[start+mIndex])
+		}
+		start += stride
+		wpts[i] = wpt
+	}
+	return wpts
+}
+
+// NewTrkType returns a new TrkType with geometry g.
+func NewTrkType(g *geom.MultiLineString) *TrkType {
+	trkSegs := make([]*TrkSegType, g.NumLineStrings())
+	for i := range trkSegs {
+		trkSegs[i] = NewTrkSegType(g.LineString(i))
+	}
+	return &TrkType{
+		TrkSeg: trkSegs,
+	}
+}
+
+// Geom returns t's geometry.
+func (t *TrkType) Geom(layout geom.Layout) *geom.MultiLineString {
+	ends := make([]int, len(t.TrkSeg))
+	end := 0
+	for i, ts := range t.TrkSeg {
+		end += layout.Stride() * len(ts.TrkPt)
+		ends[i] = end
+	}
+	flatCoords := make([]float64, 0, end)
+	for _, ts := range t.TrkSeg {
+		for _, tp := range ts.TrkPt {
+			flatCoords = tp.appendFlatCoords(flatCoords, layout)
+		}
+	}
+	return geom.NewMultiLineStringFlat(layout, flatCoords, ends)
+}
+
+// NewTrkSegType returns a new TrkSegType with geometry g.
+func NewTrkSegType(g *geom.LineString) *TrkSegType {
+	return &TrkSegType{
+		TrkPt: newWptTypes(g),
+	}
+}
+
+// Geom returns ts's geometry.
+func (ts *TrkSegType) Geom(layout geom.Layout) *geom.LineString {
+	flatCoords := make([]float64, 0, layout.Stride()*len(ts.TrkPt))
+	for _, tp := range ts.TrkPt {
+		flatCoords = tp.appendFlatCoords(flatCoords, layout)
+	}
+	return geom.NewLineStringFlat(layout, flatCoords)
+}
+
+// NewRteType returns a new RteType with geometry g.
+func NewRteType(g *geom.LineString) *RteType {
+	return &RteType{
+		RtePt: newWptTypes(g),
+	}
+}
+
+// Geom returns r's geometry.
+func (r *RteType) Geom(layout geom.Layout) *geom.LineString {
+	flatCoords := make([]float64, 0, layout.Stride()*len(r.RtePt))
+	for _, rp := range r.RtePt {
+		flatCoords = rp.appendFlatCoords(flatCoords, layout)
+	}
+	return geom.NewLineStringFlat(layout, flatCoords)
+}
+
+// NewWptType returns a new WptType with geometry g.
+func NewWptType(g *geom.Point) *WptType {
+	flatCoords := g.FlatCoords()
+	layout := g.Layout()
+	w := &WptType{
+		Lat: flatCoords[1],
+		Lon: flatCoords[0],
+	}
+	if zIndex := layout.ZIndex(); zIndex != -1 {
+		w.Ele = flatCoords[zIndex]
+	}
+	if mIndex := layout.MIndex(); mIndex != -1 {
+		w.Time = mToTime(flatCoords[mIndex])
+	}
+	return w
+}
+
+// Geom returns w's geometry.
+func (w *WptType) Geom(layout geom.Layout) *geom.Point {
+	return geom.NewPointFlat(layout, w.appendFlatCoords(make([]float64, 0, layout.Stride()), layout))
 }
 
 // MarshalXML implements xml.Marshaler.MarshalXML.
