@@ -220,6 +220,102 @@ func TestWpt(t *testing.T) {
 	}
 }
 
+func TestRte(t *testing.T) {
+	for _, tc := range []struct {
+		data          string
+		rte           *RteType
+		layout        geom.Layout
+		g             *geom.LineString
+		noTestMarshal bool
+	}{
+		{
+			data: "<rte>\n" +
+				"\t<name>BELLEVUE</name>\n" +
+				"\t<desc>Bike Loop Bellevue</desc>\n" +
+				"\t<number>1</number>\n" +
+				"\t<rtept lat=\"42.43095\" lon=\"-71.107628\">\n" +
+				"\t\t<ele>23.4696</ele>\n" +
+				"\t\t<time>2001-06-02T00:18:15Z</time>\n" +
+				"\t\t<name>BELLEVUE</name>\n" +
+				"\t\t<cmt>BELLEVUE</cmt>\n" +
+				"\t\t<desc>Bellevue Parking Lot</desc>\n" +
+				"\t\t<sym>Parking Area</sym>\n" +
+				"\t\t<type>Parking</type>\n" +
+				"\t</rtept>\n" +
+				"\t<rtept lat=\"42.43124\" lon=\"-71.109236\">\n" +
+				"\t\t<ele>26.56189</ele>\n" +
+				"\t\t<time>2001-11-07T23:53:41Z</time>\n" +
+				"\t\t<name>GATE6</name>\n" +
+				"\t\t<desc>Gate 6</desc>\n" +
+				"\t\t<sym>Trailhead</sym>\n" +
+				"\t\t<type>Trail Head</type>\n" +
+				"\t</rtept>\n" +
+				"</rte>",
+			rte: &RteType{
+				Name:   "BELLEVUE",
+				Desc:   "Bike Loop Bellevue",
+				Number: 1,
+				RtePt: []*WptType{
+					&WptType{
+						Lat:  42.430950,
+						Lon:  -71.107628,
+						Ele:  23.469600,
+						Time: time.Date(2001, 6, 2, 0, 18, 15, 0, time.UTC),
+						Name: "BELLEVUE",
+						Cmt:  "BELLEVUE",
+						Desc: "Bellevue Parking Lot",
+						Sym:  "Parking Area",
+						Type: "Parking",
+					},
+					&WptType{
+						Lat:  42.431240,
+						Lon:  -71.109236,
+						Ele:  26.561890,
+						Time: time.Date(2001, 11, 7, 23, 53, 41, 0, time.UTC),
+						Name: "GATE6",
+						Desc: "Gate 6",
+						Sym:  "Trailhead",
+						Type: "Trail Head",
+					},
+				},
+			},
+			layout: geom.XYZM,
+			g: geom.NewLineString(geom.XYZM).MustSetCoords(
+				[]geom.Coord{
+					geom.Coord{-71.107628, 42.43095, 23.4696, 991441095},
+					geom.Coord{-71.109236, 42.431240, 26.56189, 1005177221},
+				},
+			),
+		},
+	} {
+		var gotRte RteType
+		if err := xml.Unmarshal([]byte(tc.data), &gotRte); err != nil {
+			t.Errorf("xml.Unmarshal([]byte(%q), &gotRte) == %v, want nil", tc.data, err)
+		}
+		if diff, equal := messagediff.PrettyDiff(tc.rte, &gotRte); !equal {
+			t.Errorf("xml.Unmarshal([]byte(%q), &gotRte); got == %#v, diff\n%s", tc.data, gotRte, diff)
+		}
+		if tc.layout != geom.NoLayout {
+			gotG := tc.rte.Geom(tc.layout)
+			if diff, equal := messagediff.PrettyDiff(tc.g, gotG); !equal {
+				t.Errorf("%#v.Geom() == %#v, diff\n%s", tc.rte, gotG, diff)
+			}
+		}
+		if !tc.noTestMarshal {
+			var b bytes.Buffer
+			e := xml.NewEncoder(&b)
+			e.Indent("", "\t")
+			start := xml.StartElement{Name: xml.Name{Local: "rte"}}
+			if err := e.EncodeElement(tc.rte, start); err != nil {
+				t.Errorf("e.EncodeElement(%#v, %#v) == _, %v, want _, nil", tc.rte, start, err)
+			}
+			if diff, equal := messagediff.PrettyDiff(strings.Split(tc.data, "\n"), strings.Split(b.String(), "\n")); !equal {
+				t.Errorf("xml.Marshal(%#v) == %q, nil, want %q, diff\n%s", tc.rte, b.String(), tc.data, diff)
+			}
+		}
+	}
+}
+
 func TestRoundTrip(t *testing.T) {
 	for _, tc := range []struct {
 		data string

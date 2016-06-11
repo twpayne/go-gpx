@@ -215,6 +215,15 @@ func (w *WptType) appendFlatCoords(flatCoords []float64, layout geom.Layout) []f
 	}
 }
 
+// Geom returns r's geometry.
+func (r *RteType) Geom(layout geom.Layout) *geom.LineString {
+	flatCoords := make([]float64, 0, layout.Stride()*len(r.RtePt))
+	for _, rp := range r.RtePt {
+		flatCoords = rp.appendFlatCoords(flatCoords, layout)
+	}
+	return geom.NewLineStringFlat(layout, flatCoords)
+}
+
 // Geom returns w's geometry.
 func (w *WptType) Geom(layout geom.Layout) *geom.Point {
 	return geom.NewPointFlat(layout, w.appendFlatCoords(make([]float64, 0, layout.Stride()), layout))
