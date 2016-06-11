@@ -257,9 +257,9 @@ func TestRte(t *testing.T) {
 				Number: 1,
 				RtePt: []*WptType{
 					&WptType{
-						Lat:  42.430950,
+						Lat:  42.43095,
 						Lon:  -71.107628,
-						Ele:  23.469600,
+						Ele:  23.4696,
 						Time: time.Date(2001, 6, 2, 0, 18, 15, 0, time.UTC),
 						Name: "BELLEVUE",
 						Cmt:  "BELLEVUE",
@@ -268,9 +268,9 @@ func TestRte(t *testing.T) {
 						Type: "Parking",
 					},
 					&WptType{
-						Lat:  42.431240,
+						Lat:  42.43124,
 						Lon:  -71.109236,
-						Ele:  26.561890,
+						Ele:  26.56189,
 						Time: time.Date(2001, 11, 7, 23, 53, 41, 0, time.UTC),
 						Name: "GATE6",
 						Desc: "Gate 6",
@@ -283,7 +283,7 @@ func TestRte(t *testing.T) {
 			g: geom.NewLineString(geom.XYZM).MustSetCoords(
 				[]geom.Coord{
 					geom.Coord{-71.107628, 42.43095, 23.4696, 991441095},
-					geom.Coord{-71.109236, 42.431240, 26.56189, 1005177221},
+					geom.Coord{-71.109236, 42.43124, 26.56189, 1005177221},
 				},
 			),
 		},
@@ -407,9 +407,9 @@ func TestRoundTrip(t *testing.T) {
 						Number: 1,
 						RtePt: []*WptType{
 							&WptType{
-								Lat:  42.430950,
+								Lat:  42.43095,
 								Lon:  -71.107628,
-								Ele:  23.469600,
+								Ele:  23.4696,
 								Time: time.Date(2001, 6, 2, 0, 18, 15, 0, time.UTC),
 								Name: "BELLEVUE",
 								Cmt:  "BELLEVUE",
@@ -418,9 +418,9 @@ func TestRoundTrip(t *testing.T) {
 								Type: "Parking",
 							},
 							&WptType{
-								Lat:  42.431240,
+								Lat:  42.43124,
 								Lon:  -71.109236,
-								Ele:  26.561890,
+								Ele:  26.56189,
 								Time: time.Date(2001, 11, 7, 23, 53, 41, 0, time.UTC),
 								Name: "GATE6",
 								Desc: "Gate 6",
