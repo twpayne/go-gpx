@@ -44,7 +44,7 @@ func ExampleT_WriteIndent() {
 		Version: "1.0",
 		Creator: "ExpertGPS 1.1 - http://www.topografix.com",
 		Wpt: []*WptType{
-			&WptType{
+			{
 				Lat:  42.438878,
 				Lon:  -71.119277,
 				Ele:  44.586548,
@@ -174,7 +174,7 @@ func TestWpt(t *testing.T) {
 				Desc:        "5066",
 				Src:         "Source",
 				Link: []*LinkType{
-					&LinkType{
+					{
 						HREF: "http://example.com",
 						Text: "Text",
 						Type: "Type",
@@ -245,11 +245,11 @@ func TestRte(t *testing.T) {
 				"</rte>",
 			rte: &RteType{
 				RtePt: []*WptType{
-					&WptType{
+					{
 						Lat: 42.43095,
 						Lon: -71.107628,
 					},
-					&WptType{
+					{
 						Lat: 42.43124,
 						Lon: -71.109236,
 					},
@@ -258,8 +258,8 @@ func TestRte(t *testing.T) {
 			layout: geom.XY,
 			g: geom.NewLineString(geom.XY).MustSetCoords(
 				[]geom.Coord{
-					geom.Coord{-71.107628, 42.43095},
-					geom.Coord{-71.109236, 42.43124},
+					{-71.107628, 42.43095},
+					{-71.109236, 42.43124},
 				},
 			),
 		},
@@ -274,12 +274,12 @@ func TestRte(t *testing.T) {
 				"</rte>",
 			rte: &RteType{
 				RtePt: []*WptType{
-					&WptType{
+					{
 						Lat: 42.43095,
 						Lon: -71.107628,
 						Ele: 23.4696,
 					},
-					&WptType{
+					{
 						Lat: 42.43124,
 						Lon: -71.109236,
 						Ele: 26.56189,
@@ -289,8 +289,8 @@ func TestRte(t *testing.T) {
 			layout: geom.XYZ,
 			g: geom.NewLineString(geom.XYZ).MustSetCoords(
 				[]geom.Coord{
-					geom.Coord{-71.107628, 42.43095, 23.4696},
-					geom.Coord{-71.109236, 42.43124, 26.56189},
+					{-71.107628, 42.43095, 23.4696},
+					{-71.109236, 42.43124, 26.56189},
 				},
 			),
 		},
@@ -305,12 +305,12 @@ func TestRte(t *testing.T) {
 				"</rte>",
 			rte: &RteType{
 				RtePt: []*WptType{
-					&WptType{
+					{
 						Lat:  42.43095,
 						Lon:  -71.107628,
 						Time: time.Date(2001, 6, 2, 0, 18, 15, 0, time.UTC),
 					},
-					&WptType{
+					{
 						Lat:  42.43124,
 						Lon:  -71.109236,
 						Time: time.Date(2001, 11, 7, 23, 53, 41, 0, time.UTC),
@@ -320,8 +320,8 @@ func TestRte(t *testing.T) {
 			layout: geom.XYM,
 			g: geom.NewLineString(geom.XYM).MustSetCoords(
 				[]geom.Coord{
-					geom.Coord{-71.107628, 42.43095, 991441095},
-					geom.Coord{-71.109236, 42.43124, 1005177221},
+					{-71.107628, 42.43095, 991441095},
+					{-71.109236, 42.43124, 1005177221},
 				},
 			),
 		},
@@ -338,13 +338,13 @@ func TestRte(t *testing.T) {
 				"</rte>",
 			rte: &RteType{
 				RtePt: []*WptType{
-					&WptType{
+					{
 						Lat:  42.43095,
 						Lon:  -71.107628,
 						Ele:  23.4696,
 						Time: time.Date(2001, 6, 2, 0, 18, 15, 0, time.UTC),
 					},
-					&WptType{
+					{
 						Lat:  42.43124,
 						Lon:  -71.109236,
 						Ele:  26.56189,
@@ -355,8 +355,8 @@ func TestRte(t *testing.T) {
 			layout: geom.XYZM,
 			g: geom.NewLineString(geom.XYZM).MustSetCoords(
 				[]geom.Coord{
-					geom.Coord{-71.107628, 42.43095, 23.4696, 991441095},
-					geom.Coord{-71.109236, 42.43124, 26.56189, 1005177221},
+					{-71.107628, 42.43095, 23.4696, 991441095},
+					{-71.109236, 42.43124, 26.56189, 1005177221},
 				},
 			),
 		},
@@ -388,7 +388,7 @@ func TestRte(t *testing.T) {
 				Desc:   "Bike Loop Bellevue",
 				Number: 1,
 				RtePt: []*WptType{
-					&WptType{
+					{
 						Lat:  42.43095,
 						Lon:  -71.107628,
 						Ele:  23.4696,
@@ -399,7 +399,7 @@ func TestRte(t *testing.T) {
 						Sym:  "Parking Area",
 						Type: "Parking",
 					},
-					&WptType{
+					{
 						Lat:  42.43124,
 						Lon:  -71.109236,
 						Ele:  26.56189,
@@ -414,8 +414,8 @@ func TestRte(t *testing.T) {
 			layout: geom.XYZM,
 			g: geom.NewLineString(geom.XYZM).MustSetCoords(
 				[]geom.Coord{
-					geom.Coord{-71.107628, 42.43095, 23.4696, 991441095},
-					geom.Coord{-71.109236, 42.43124, 26.56189, 1005177221},
+					{-71.107628, 42.43095, 23.4696, 991441095},
+					{-71.109236, 42.43124, 26.56189, 1005177221},
 				},
 			),
 			noTestNew: true,
@@ -483,21 +483,21 @@ func TestTrk(t *testing.T) {
 				"</trk>",
 			trk: &TrkType{
 				TrkSeg: []*TrkSegType{
-					&TrkSegType{
+					{
 						TrkPt: []*WptType{
-							&WptType{
+							{
 								Lat:  47.644548,
 								Lon:  -122.326897,
 								Ele:  4.46,
 								Time: time.Date(2009, 10, 17, 18, 37, 26, 0, time.UTC),
 							},
-							&WptType{
+							{
 								Lat:  47.644548,
 								Lon:  -122.326897,
 								Ele:  4.94,
 								Time: time.Date(2009, 10, 17, 18, 37, 31, 0, time.UTC),
 							},
-							&WptType{
+							{
 								Lat:  47.644548,
 								Lon:  -122.326897,
 								Ele:  6.87,
@@ -510,10 +510,10 @@ func TestTrk(t *testing.T) {
 			layout: geom.XYZM,
 			g: geom.NewMultiLineString(geom.XYZM).MustSetCoords(
 				[][]geom.Coord{
-					[]geom.Coord{
-						geom.Coord{-122.326897, 47.644548, 4.46, 1255804646},
-						geom.Coord{-122.326897, 47.644548, 4.94, 1255804651},
-						geom.Coord{-122.326897, 47.644548, 6.87, 1255804654},
+					{
+						{-122.326897, 47.644548, 4.46, 1255804646},
+						{-122.326897, 47.644548, 4.94, 1255804651},
+						{-122.326897, 47.644548, 6.87, 1255804654},
 					},
 				},
 			),
@@ -591,7 +591,7 @@ func TestRoundTrip(t *testing.T) {
 				Version: "1.0",
 				Creator: "ExpertGPS 1.1 - http://www.topografix.com",
 				Wpt: []*WptType{
-					&WptType{
+					{
 						Lat:  42.438878,
 						Lon:  -71.119277,
 						Ele:  44.586548,
@@ -638,12 +638,12 @@ func TestRoundTrip(t *testing.T) {
 				Version: "1.0",
 				Creator: "ExpertGPS 1.1 - http://www.topografix.com",
 				Rte: []*RteType{
-					&RteType{
+					{
 						Name:   "BELLEVUE",
 						Desc:   "Bike Loop Bellevue",
 						Number: 1,
 						RtePt: []*WptType{
-							&WptType{
+							{
 								Lat:  42.43095,
 								Lon:  -71.107628,
 								Ele:  23.4696,
@@ -654,7 +654,7 @@ func TestRoundTrip(t *testing.T) {
 								Sym:  "Parking Area",
 								Type: "Parking",
 							},
-							&WptType{
+							{
 								Lat:  42.43124,
 								Lon:  -71.109236,
 								Ele:  26.56189,
