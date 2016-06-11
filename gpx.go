@@ -240,6 +240,17 @@ func newWptTypes(g *geom.LineString) []*WptType {
 	return wpts
 }
 
+// NewTrkType returns a new TrkType with geometry g.
+func NewTrkType(g *geom.MultiLineString) *TrkType {
+	trkSegs := make([]*TrkSegType, g.NumLineStrings())
+	for i := range trkSegs {
+		trkSegs[i] = NewTrkSegType(g.LineString(i))
+	}
+	return &TrkType{
+		TrkSeg: trkSegs,
+	}
+}
+
 // Geom returns t's geometry.
 func (t *TrkType) Geom(layout geom.Layout) *geom.MultiLineString {
 	ends := make([]int, len(t.TrkSeg))

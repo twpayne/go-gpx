@@ -462,6 +462,7 @@ func TestTrk(t *testing.T) {
 		layout        geom.Layout
 		g             *geom.MultiLineString
 		noTestMarshal bool
+		noTestNew     bool
 	}{
 		{
 			data: "<trk>\n" +
@@ -541,6 +542,12 @@ func TestTrk(t *testing.T) {
 			}
 			if diff, equal := messagediff.PrettyDiff(strings.Split(tc.data, "\n"), strings.Split(b.String(), "\n")); !equal {
 				t.Errorf("xml.Marshal(%#v) == %q, nil, want %q, diff\n%s", tc.trk, b.String(), tc.data, diff)
+			}
+		}
+		if !tc.noTestNew {
+			gotTrk := NewTrkType(tc.g)
+			if diff, equal := messagediff.PrettyDiff(tc.trk, gotTrk); !equal {
+				t.Errorf("NewTrkType(%#v) == %#v, want %#v, diff\n%s", tc.g, gotTrk, tc.trk, diff)
 			}
 		}
 	}
