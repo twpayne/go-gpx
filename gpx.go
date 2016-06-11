@@ -466,23 +466,23 @@ func (t *T) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	start = xml.StartElement{
 		Name: xml.Name{Local: "gpx"},
 		Attr: []xml.Attr{
-			xml.Attr{
+			{
 				Name:  xml.Name{Local: "version"},
 				Value: t.Version,
 			},
-			xml.Attr{
+			{
 				Name:  xml.Name{Local: "creator"},
 				Value: t.Creator,
 			},
-			xml.Attr{
+			{
 				Name:  xml.Name{Local: "xmlns:xsi"},
 				Value: "http://www.w3.org/2001/XMLSchema-instance",
 			},
-			xml.Attr{
+			{
 				Name:  xml.Name{Local: "xmlns"},
 				Value: baseURL,
 			},
-			xml.Attr{
+			{
 				Name:  xml.Name{Local: "xsi:schemaLocation"},
 				Value: baseURL + " " + baseURL + "/gpx.xsd",
 			},
