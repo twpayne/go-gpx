@@ -316,6 +316,97 @@ func TestRte(t *testing.T) {
 	}
 }
 
+func TestTrk(t *testing.T) {
+	for _, tc := range []struct {
+		data          string
+		trk           *TrkType
+		layout        geom.Layout
+		g             *geom.MultiLineString
+		noTestMarshal bool
+	}{
+		{
+			data: "<trk>\n" +
+				"\t<trkseg>\n" +
+				"\t\t<trkpt lat=\"47.644548\" lon=\"-122.326897\">\n" +
+				"\t\t\t<ele>4.46</ele>\n" +
+				"\t\t\t<time>2009-10-17T18:37:26Z</time>\n" +
+				"\t\t</trkpt>\n" +
+				"\t\t<trkpt lat=\"47.644548\" lon=\"-122.326897\">\n" +
+				"\t\t\t<ele>4.94</ele>\n" +
+				"\t\t\t<time>2009-10-17T18:37:31Z</time>\n" +
+				"\t\t</trkpt>\n" +
+				"\t\t<trkpt lat=\"47.644548\" lon=\"-122.326897\">\n" +
+				"\t\t\t<ele>6.87</ele>\n" +
+				"\t\t\t<time>2009-10-17T18:37:34Z</time>\n" +
+				"\t\t</trkpt>\n" +
+				"\t</trkseg>\n" +
+				"</trk>",
+			trk: &TrkType{
+				TrkSeg: []*TrkSegType{
+					&TrkSegType{
+						TrkPt: []*WptType{
+							&WptType{
+								Lat:  47.644548,
+								Lon:  -122.326897,
+								Ele:  4.46,
+								Time: time.Date(2009, 10, 17, 18, 37, 26, 0, time.UTC),
+							},
+							&WptType{
+								Lat:  47.644548,
+								Lon:  -122.326897,
+								Ele:  4.94,
+								Time: time.Date(2009, 10, 17, 18, 37, 31, 0, time.UTC),
+							},
+							&WptType{
+								Lat:  47.644548,
+								Lon:  -122.326897,
+								Ele:  6.87,
+								Time: time.Date(2009, 10, 17, 18, 37, 34, 0, time.UTC),
+							},
+						},
+					},
+				},
+			},
+			layout: geom.XYZM,
+			g: geom.NewMultiLineString(geom.XYZM).MustSetCoords(
+				[][]geom.Coord{
+					[]geom.Coord{
+						geom.Coord{-122.326897, 47.644548, 4.46, 1255804646},
+						geom.Coord{-122.326897, 47.644548, 4.94, 1255804651},
+						geom.Coord{-122.326897, 47.644548, 6.87, 1255804654},
+					},
+				},
+			),
+		},
+	} {
+		var gotTrk TrkType
+		if err := xml.Unmarshal([]byte(tc.data), &gotTrk); err != nil {
+			t.Errorf("xml.Unmarshal([]byte(%q), &gotTrk) == %v, want nil", tc.data, err)
+		}
+		if diff, equal := messagediff.PrettyDiff(tc.trk, &gotTrk); !equal {
+			t.Errorf("xml.Unmarshal([]byte(%q), &gotTrk); got == %#v, diff\n%s", tc.data, gotTrk, diff)
+		}
+		if tc.layout != geom.NoLayout {
+			gotG := tc.trk.Geom(tc.layout)
+			if diff, equal := messagediff.PrettyDiff(tc.g, gotG); !equal {
+				t.Errorf("%#v.Geom() == %#v, diff\n%s", tc.trk, gotG, diff)
+			}
+		}
+		if !tc.noTestMarshal {
+			var b bytes.Buffer
+			e := xml.NewEncoder(&b)
+			e.Indent("", "\t")
+			start := xml.StartElement{Name: xml.Name{Local: "trk"}}
+			if err := e.EncodeElement(tc.trk, start); err != nil {
+				t.Errorf("e.EncodeElement(%#v, %#v) == _, %v, want _, nil", tc.trk, start, err)
+			}
+			if diff, equal := messagediff.PrettyDiff(strings.Split(tc.data, "\n"), strings.Split(b.String(), "\n")); !equal {
+				t.Errorf("xml.Marshal(%#v) == %q, nil, want %q, diff\n%s", tc.trk, b.String(), tc.data, diff)
+			}
+		}
+	}
+}
+
 func TestRoundTrip(t *testing.T) {
 	for _, tc := range []struct {
 		data string

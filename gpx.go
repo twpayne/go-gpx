@@ -215,6 +215,23 @@ func (w *WptType) appendFlatCoords(flatCoords []float64, layout geom.Layout) []f
 	}
 }
 
+// Geom returns t's geometry.
+func (t *TrkType) Geom(layout geom.Layout) *geom.MultiLineString {
+	ends := make([]int, len(t.TrkSeg))
+	end := 0
+	for i, ts := range t.TrkSeg {
+		end += layout.Stride() * len(ts.TrkPt)
+		ends[i] = end
+	}
+	flatCoords := make([]float64, 0, end)
+	for _, ts := range t.TrkSeg {
+		for _, tp := range ts.TrkPt {
+			flatCoords = tp.appendFlatCoords(flatCoords, layout)
+		}
+	}
+	return geom.NewMultiLineStringFlat(layout, flatCoords, ends)
+}
+
 // Geom returns ts's geometry.
 func (ts *TrkSegType) Geom(layout geom.Layout) *geom.LineString {
 	flatCoords := make([]float64, 0, layout.Stride()*len(ts.TrkPt))
