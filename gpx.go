@@ -257,6 +257,13 @@ func (t *TrkType) Geom(layout geom.Layout) *geom.MultiLineString {
 	return geom.NewMultiLineStringFlat(layout, flatCoords, ends)
 }
 
+// NewTrkSegType returns a new TrkSegType with geometry g.
+func NewTrkSegType(g *geom.LineString) *TrkSegType {
+	return &TrkSegType{
+		TrkPt: newWptTypes(g),
+	}
+}
+
 // Geom returns ts's geometry.
 func (ts *TrkSegType) Geom(layout geom.Layout) *geom.LineString {
 	flatCoords := make([]float64, 0, layout.Stride()*len(ts.TrkPt))
