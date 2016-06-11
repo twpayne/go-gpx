@@ -241,6 +241,34 @@ func (ts *TrkSegType) Geom(layout geom.Layout) *geom.LineString {
 	return geom.NewLineStringFlat(layout, flatCoords)
 }
 
+// NewRteType returns a new RteType with geometry g.
+func NewRteType(g *geom.LineString) *RteType {
+	flatCoords := g.FlatCoords()
+	layout := g.Layout()
+	mIndex := layout.MIndex()
+	zIndex := layout.ZIndex()
+	stride := layout.Stride()
+	rtePts := make([]*WptType, g.NumCoords())
+	start := 0
+	for i := range rtePts {
+		w := &WptType{
+			Lat: flatCoords[start+1],
+			Lon: flatCoords[start],
+		}
+		if zIndex != -1 {
+			w.Ele = flatCoords[start+zIndex]
+		}
+		if mIndex != -1 {
+			w.Time = mToTime(flatCoords[start+mIndex])
+		}
+		start += stride
+		rtePts[i] = w
+	}
+	return &RteType{
+		RtePt: rtePts,
+	}
+}
+
 // Geom returns r's geometry.
 func (r *RteType) Geom(layout geom.Layout) *geom.LineString {
 	flatCoords := make([]float64, 0, layout.Stride()*len(r.RtePt))

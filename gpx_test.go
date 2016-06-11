@@ -236,7 +236,130 @@ func TestRte(t *testing.T) {
 		layout        geom.Layout
 		g             *geom.LineString
 		noTestMarshal bool
+		noTestNew     bool
 	}{
+		{
+			data: "<rte>\n" +
+				"\t<rtept lat=\"42.43095\" lon=\"-71.107628\"></rtept>\n" +
+				"\t<rtept lat=\"42.43124\" lon=\"-71.109236\"></rtept>\n" +
+				"</rte>",
+			rte: &RteType{
+				RtePt: []*WptType{
+					&WptType{
+						Lat: 42.43095,
+						Lon: -71.107628,
+					},
+					&WptType{
+						Lat: 42.43124,
+						Lon: -71.109236,
+					},
+				},
+			},
+			layout: geom.XY,
+			g: geom.NewLineString(geom.XY).MustSetCoords(
+				[]geom.Coord{
+					geom.Coord{-71.107628, 42.43095},
+					geom.Coord{-71.109236, 42.43124},
+				},
+			),
+		},
+		{
+			data: "<rte>\n" +
+				"\t<rtept lat=\"42.43095\" lon=\"-71.107628\">\n" +
+				"\t\t<ele>23.4696</ele>\n" +
+				"\t</rtept>\n" +
+				"\t<rtept lat=\"42.43124\" lon=\"-71.109236\">\n" +
+				"\t\t<ele>26.56189</ele>\n" +
+				"\t</rtept>\n" +
+				"</rte>",
+			rte: &RteType{
+				RtePt: []*WptType{
+					&WptType{
+						Lat: 42.43095,
+						Lon: -71.107628,
+						Ele: 23.4696,
+					},
+					&WptType{
+						Lat: 42.43124,
+						Lon: -71.109236,
+						Ele: 26.56189,
+					},
+				},
+			},
+			layout: geom.XYZ,
+			g: geom.NewLineString(geom.XYZ).MustSetCoords(
+				[]geom.Coord{
+					geom.Coord{-71.107628, 42.43095, 23.4696},
+					geom.Coord{-71.109236, 42.43124, 26.56189},
+				},
+			),
+		},
+		{
+			data: "<rte>\n" +
+				"\t<rtept lat=\"42.43095\" lon=\"-71.107628\">\n" +
+				"\t\t<time>2001-06-02T00:18:15Z</time>\n" +
+				"\t</rtept>\n" +
+				"\t<rtept lat=\"42.43124\" lon=\"-71.109236\">\n" +
+				"\t\t<time>2001-11-07T23:53:41Z</time>\n" +
+				"\t</rtept>\n" +
+				"</rte>",
+			rte: &RteType{
+				RtePt: []*WptType{
+					&WptType{
+						Lat:  42.43095,
+						Lon:  -71.107628,
+						Time: time.Date(2001, 6, 2, 0, 18, 15, 0, time.UTC),
+					},
+					&WptType{
+						Lat:  42.43124,
+						Lon:  -71.109236,
+						Time: time.Date(2001, 11, 7, 23, 53, 41, 0, time.UTC),
+					},
+				},
+			},
+			layout: geom.XYM,
+			g: geom.NewLineString(geom.XYM).MustSetCoords(
+				[]geom.Coord{
+					geom.Coord{-71.107628, 42.43095, 991441095},
+					geom.Coord{-71.109236, 42.43124, 1005177221},
+				},
+			),
+		},
+		{
+			data: "<rte>\n" +
+				"\t<rtept lat=\"42.43095\" lon=\"-71.107628\">\n" +
+				"\t\t<ele>23.4696</ele>\n" +
+				"\t\t<time>2001-06-02T00:18:15Z</time>\n" +
+				"\t</rtept>\n" +
+				"\t<rtept lat=\"42.43124\" lon=\"-71.109236\">\n" +
+				"\t\t<ele>26.56189</ele>\n" +
+				"\t\t<time>2001-11-07T23:53:41Z</time>\n" +
+				"\t</rtept>\n" +
+				"</rte>",
+			rte: &RteType{
+				RtePt: []*WptType{
+					&WptType{
+						Lat:  42.43095,
+						Lon:  -71.107628,
+						Ele:  23.4696,
+						Time: time.Date(2001, 6, 2, 0, 18, 15, 0, time.UTC),
+					},
+					&WptType{
+						Lat:  42.43124,
+						Lon:  -71.109236,
+						Ele:  26.56189,
+						Time: time.Date(2001, 11, 7, 23, 53, 41, 0, time.UTC),
+					},
+				},
+			},
+			layout: geom.XYZM,
+			g: geom.NewLineString(geom.XYZM).MustSetCoords(
+				[]geom.Coord{
+					geom.Coord{-71.107628, 42.43095, 23.4696, 991441095},
+					geom.Coord{-71.109236, 42.43124, 26.56189, 1005177221},
+				},
+			),
+		},
 		{
 			data: "<rte>\n" +
 				"\t<name>BELLEVUE</name>\n" +
@@ -295,6 +418,7 @@ func TestRte(t *testing.T) {
 					geom.Coord{-71.109236, 42.43124, 26.56189, 1005177221},
 				},
 			),
+			noTestNew: true,
 		},
 	} {
 		var gotRte RteType
@@ -320,6 +444,12 @@ func TestRte(t *testing.T) {
 			}
 			if diff, equal := messagediff.PrettyDiff(strings.Split(tc.data, "\n"), strings.Split(b.String(), "\n")); !equal {
 				t.Errorf("xml.Marshal(%#v) == %q, nil, want %q, diff\n%s", tc.rte, b.String(), tc.data, diff)
+			}
+		}
+		if !tc.noTestNew {
+			gotRte := NewRteType(tc.g)
+			if diff, equal := messagediff.PrettyDiff(tc.rte, gotRte); !equal {
+				t.Errorf("NewRteType(%#v) == %#v, want %#v, diff\n%s", tc.g, gotRte, tc.rte, diff)
 			}
 		}
 	}
