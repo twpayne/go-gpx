@@ -215,6 +215,31 @@ func (w *WptType) appendFlatCoords(flatCoords []float64, layout geom.Layout) []f
 	}
 }
 
+func newWptTypes(g *geom.LineString) []*WptType {
+	flatCoords := g.FlatCoords()
+	layout := g.Layout()
+	mIndex := layout.MIndex()
+	zIndex := layout.ZIndex()
+	stride := layout.Stride()
+	wpts := make([]*WptType, g.NumCoords())
+	start := 0
+	for i := range wpts {
+		wpt := &WptType{
+			Lat: flatCoords[start+1],
+			Lon: flatCoords[start],
+		}
+		if zIndex != -1 {
+			wpt.Ele = flatCoords[start+zIndex]
+		}
+		if mIndex != -1 {
+			wpt.Time = mToTime(flatCoords[start+mIndex])
+		}
+		start += stride
+		wpts[i] = wpt
+	}
+	return wpts
+}
+
 // Geom returns t's geometry.
 func (t *TrkType) Geom(layout geom.Layout) *geom.MultiLineString {
 	ends := make([]int, len(t.TrkSeg))
@@ -243,29 +268,8 @@ func (ts *TrkSegType) Geom(layout geom.Layout) *geom.LineString {
 
 // NewRteType returns a new RteType with geometry g.
 func NewRteType(g *geom.LineString) *RteType {
-	flatCoords := g.FlatCoords()
-	layout := g.Layout()
-	mIndex := layout.MIndex()
-	zIndex := layout.ZIndex()
-	stride := layout.Stride()
-	rtePts := make([]*WptType, g.NumCoords())
-	start := 0
-	for i := range rtePts {
-		w := &WptType{
-			Lat: flatCoords[start+1],
-			Lon: flatCoords[start],
-		}
-		if zIndex != -1 {
-			w.Ele = flatCoords[start+zIndex]
-		}
-		if mIndex != -1 {
-			w.Time = mToTime(flatCoords[start+mIndex])
-		}
-		start += stride
-		rtePts[i] = w
-	}
 	return &RteType{
-		RtePt: rtePts,
+		RtePt: newWptTypes(g),
 	}
 }
 
