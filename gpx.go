@@ -250,6 +250,23 @@ func (r *RteType) Geom(layout geom.Layout) *geom.LineString {
 	return geom.NewLineStringFlat(layout, flatCoords)
 }
 
+// NewWptType returns a new WptType with geometry g.
+func NewWptType(g *geom.Point) *WptType {
+	flatCoords := g.FlatCoords()
+	layout := g.Layout()
+	w := &WptType{
+		Lat: flatCoords[1],
+		Lon: flatCoords[0],
+	}
+	if zIndex := layout.ZIndex(); zIndex != -1 {
+		w.Ele = flatCoords[zIndex]
+	}
+	if mIndex := layout.MIndex(); mIndex != -1 {
+		w.Time = mToTime(flatCoords[mIndex])
+	}
+	return w
+}
+
 // Geom returns w's geometry.
 func (w *WptType) Geom(layout geom.Layout) *geom.Point {
 	return geom.NewPointFlat(layout, w.appendFlatCoords(make([]float64, 0, layout.Stride()), layout))

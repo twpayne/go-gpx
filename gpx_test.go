@@ -79,6 +79,7 @@ func TestWpt(t *testing.T) {
 		layout        geom.Layout
 		g             *geom.Point
 		noTestMarshal bool
+		noTestNew     bool
 	}{
 		{
 			data: "<wpt lat=\"42.438878\" lon=\"-71.119277\"></wpt>",
@@ -135,6 +136,7 @@ func TestWpt(t *testing.T) {
 			layout:        geom.XYZM,
 			g:             geom.NewPoint(geom.XYZM).MustSetCoords([]float64{-71.119277, 42.438878, 44.586548, 1006981528}),
 			noTestMarshal: true,
+			noTestNew:     true,
 		},
 		{
 			data: "<wpt lat=\"42.438878\" lon=\"-71.119277\">\n" +
@@ -188,8 +190,9 @@ func TestWpt(t *testing.T) {
 				AgeOfGPSData: 7.7,
 				DGPSID:       []int{8},
 			},
-			layout: geom.XYZM,
-			g:      geom.NewPoint(geom.XYZM).MustSetCoords([]float64{-71.119277, 42.438878, 44.586548, 1006981528}),
+			layout:    geom.XYZM,
+			g:         geom.NewPoint(geom.XYZM).MustSetCoords([]float64{-71.119277, 42.438878, 44.586548, 1006981528}),
+			noTestNew: true,
 		},
 	} {
 		var gotWpt WptType
@@ -215,6 +218,12 @@ func TestWpt(t *testing.T) {
 			}
 			if diff, equal := messagediff.PrettyDiff(strings.Split(tc.data, "\n"), strings.Split(b.String(), "\n")); !equal {
 				t.Errorf("xml.Marshal(%#v) == %q, nil, want %q, diff\n%s", tc.wpt, b.String(), tc.data, diff)
+			}
+		}
+		if !tc.noTestNew {
+			gotWpt := NewWptType(tc.g)
+			if diff, equal := messagediff.PrettyDiff(tc.wpt, gotWpt); !equal {
+				t.Errorf("NewWptType(%#v) == %#v, want %#v, diff\n%s", tc.g, gotWpt, tc.wpt, diff)
 			}
 		}
 	}
