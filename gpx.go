@@ -151,7 +151,7 @@ func timeToM(t time.Time) float64 {
 }
 
 func emitIntElement(e *xml.Encoder, localName string, value int) error {
-	return emitStringElement(e, localName, strconv.FormatInt(int64(value), 10))
+	return emitStringElement(e, localName, strconv.Itoa(value))
 }
 
 func emitStringElement(e *xml.Encoder, localName, value string) error {
