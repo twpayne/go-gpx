@@ -37,7 +37,7 @@ Read example:
 Write example:
 
 ```go
-	t := &T{
+	g := &GPX{
 		Version: "1.0",
 		Creator: "ExpertGPS 1.1 - http://www.topografix.com",
 		Wpt: []*WptType{
@@ -53,7 +53,7 @@ Write example:
 			},
 		},
 	}
-	if err := t.WriteIndent(os.Stdout, "", "  "); err != nil {
+	if err := g.WriteIndent(os.Stdout, "", "  "); err != nil {
 		fmt.Printf("err == %v", err)
 	}
 	// Output:

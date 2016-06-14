@@ -40,8 +40,8 @@ type ExtensionsType struct {
 	XML []byte `xml:",innerxml"`
 }
 
-// A T is a gpxType.
-type T struct {
+// A GPX is a gpxType.
+type GPX struct {
 	XMLName    string          `xml:"gpx"`
 	Version    string          `xml:"version,attr"`
 	Creator    string          `xml:"creator,attr"`
@@ -179,23 +179,23 @@ func maybeEmitStringElement(e *xml.Encoder, localName, value string) error {
 	return emitStringElement(e, localName, value)
 }
 
-// Read reads a new T from r.
-func Read(r io.Reader) (*T, error) {
-	t := &T{}
-	err := xml.NewDecoder(r).Decode(t)
-	return t, err
+// Read reads a new GPX from r.
+func Read(r io.Reader) (*GPX, error) {
+	gpx := &GPX{}
+	err := xml.NewDecoder(r).Decode(gpx)
+	return gpx, err
 }
 
-// Write writes t to w.
-func (t *T) Write(w io.Writer) error {
-	return xml.NewEncoder(w).EncodeElement(t, StartElement)
+// Write writes g to w.
+func (g *GPX) Write(w io.Writer) error {
+	return xml.NewEncoder(w).EncodeElement(g, StartElement)
 }
 
-// WriteIndent writes t to w.
-func (t *T) WriteIndent(w io.Writer, prefix, indent string) error {
+// WriteIndent writes g to w.
+func (g *GPX) WriteIndent(w io.Writer, prefix, indent string) error {
 	e := xml.NewEncoder(w)
 	e.Indent(prefix, indent)
-	return e.EncodeElement(t, StartElement)
+	return e.EncodeElement(g, StartElement)
 }
 
 func (w *WptType) appendFlatCoords(flatCoords []float64, layout geom.Layout) []float64 {
@@ -461,18 +461,18 @@ func (w *WptType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 }
 
 // MarshalXML implements xml.Marshaler.MarshalXML.
-func (t *T) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
-	baseURL := "http://www.topografix.com/GPX/" + strings.Join(strings.Split(t.Version, "."), "/")
+func (g *GPX) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	baseURL := "http://www.topografix.com/GPX/" + strings.Join(strings.Split(g.Version, "."), "/")
 	start = xml.StartElement{
 		Name: xml.Name{Local: "gpx"},
 		Attr: []xml.Attr{
 			{
 				Name:  xml.Name{Local: "version"},
-				Value: t.Version,
+				Value: g.Version,
 			},
 			{
 				Name:  xml.Name{Local: "creator"},
-				Value: t.Creator,
+				Value: g.Creator,
 			},
 			{
 				Name:  xml.Name{Local: "xmlns:xsi"},
@@ -491,13 +491,13 @@ func (t *T) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	if err := e.EncodeToken(start); err != nil {
 		return err
 	}
-	if err := e.EncodeElement(t.Wpt, xml.StartElement{Name: xml.Name{Local: "wpt"}}); err != nil {
+	if err := e.EncodeElement(g.Wpt, xml.StartElement{Name: xml.Name{Local: "wpt"}}); err != nil {
 		return err
 	}
-	if err := e.EncodeElement(t.Rte, xml.StartElement{Name: xml.Name{Local: "rte"}}); err != nil {
+	if err := e.EncodeElement(g.Rte, xml.StartElement{Name: xml.Name{Local: "rte"}}); err != nil {
 		return err
 	}
-	if err := e.EncodeElement(t.Trk, xml.StartElement{Name: xml.Name{Local: "trk"}}); err != nil {
+	if err := e.EncodeElement(g.Trk, xml.StartElement{Name: xml.Name{Local: "trk"}}); err != nil {
 		return err
 	}
 	return e.EncodeToken(start.End())

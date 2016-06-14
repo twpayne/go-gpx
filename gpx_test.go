@@ -39,8 +39,8 @@ func ExampleRead() {
 	// t.Wpt[0] == &{Lat:42.438878 Lon:-71.119277 Ele:44.586548 Time:2001-11-28 21:05:28 +0000 UTC MagVar:0 GeoidHeight:0 Name:5066 Cmt: Desc:5066 Src: Link:[] Sym:Crossing Type:Crossing Fix: Sat:0 HDOP:0 VDOP:0 PDOP:0 AgeOfGPSData:0 DGPSID:[] Extensions:<nil>}
 }
 
-func ExampleT_WriteIndent() {
-	t := &T{
+func ExampleGPX_WriteIndent() {
+	g := &GPX{
 		Version: "1.0",
 		Creator: "ExpertGPS 1.1 - http://www.topografix.com",
 		Wpt: []*WptType{
@@ -56,7 +56,7 @@ func ExampleT_WriteIndent() {
 			},
 		},
 	}
-	if err := t.WriteIndent(os.Stdout, "", "  "); err != nil {
+	if err := g.WriteIndent(os.Stdout, "", "  "); err != nil {
 		fmt.Printf("err == %v", err)
 	}
 	// Output:
@@ -556,7 +556,7 @@ func TestTrk(t *testing.T) {
 func TestRoundTrip(t *testing.T) {
 	for _, tc := range []struct {
 		data string
-		gpx  *T
+		gpx  *GPX
 	}{
 		{
 			data: "<gpx" +
@@ -566,7 +566,7 @@ func TestRoundTrip(t *testing.T) {
 				" xmlns=\"http://www.topografix.com/GPX/1/0\"" +
 				" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd\">" +
 				"</gpx>",
-			gpx: &T{
+			gpx: &GPX{
 				Version: "1.0",
 				Creator: "ExpertGPS 1.1 - http://www.topografix.com",
 			},
@@ -587,7 +587,7 @@ func TestRoundTrip(t *testing.T) {
 				"\t\t<type>Crossing</type>\n" +
 				"\t</wpt>\n" +
 				"</gpx>",
-			gpx: &T{
+			gpx: &GPX{
 				Version: "1.0",
 				Creator: "ExpertGPS 1.1 - http://www.topografix.com",
 				Wpt: []*WptType{
@@ -634,7 +634,7 @@ func TestRoundTrip(t *testing.T) {
 				"\t\t</rtept>\n" +
 				"\t</rte>\n" +
 				"</gpx>",
-			gpx: &T{
+			gpx: &GPX{
 				Version: "1.0",
 				Creator: "ExpertGPS 1.1 - http://www.topografix.com",
 				Rte: []*RteType{
