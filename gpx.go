@@ -428,7 +428,7 @@ func (w *WptType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	if err := d.DecodeElement(&e, &start); err != nil {
 		return err
 	}
-	*w = WptType{
+	wt := WptType{
 		Lat:          e.Lat,
 		Lon:          e.Lon,
 		Ele:          e.Ele,
@@ -455,8 +455,9 @@ func (w *WptType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 		if err != nil {
 			return err
 		}
-		w.Time = t
+		wt.Time = t
 	}
+	*w = wt
 	return nil
 }
 
