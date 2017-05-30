@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/twpayne/go-geom"
+	"golang.org/x/net/html/charset"
 )
 
 const timeLayout = "2006-01-02T15:04:05.999999999Z"
@@ -182,8 +183,9 @@ func maybeEmitStringElement(e *xml.Encoder, localName, value string) error {
 // Read reads a new GPX from r.
 func Read(r io.Reader) (*GPX, error) {
 	gpx := &GPX{}
-	err := xml.NewDecoder(r).Decode(gpx)
-	return gpx, err
+	d := xml.NewDecoder(r)
+	d.CharsetReader = charset.NewReaderLabel
+	return gpx, d.Decode(gpx)
 }
 
 // Write writes g to w.

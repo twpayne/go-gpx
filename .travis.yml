@@ -7,6 +7,7 @@ install:
         - go get github.com/d4l3k/messagediff
         - go get github.com/golang/lint/golint
         - go get github.com/twpayne/go-geom
+        - go get golang.org/x/net/html/charset
 
 script:
         - go test -v ./...
