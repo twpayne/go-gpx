@@ -716,6 +716,7 @@ func TestTime(t *testing.T) {
 
 func TestParseExamples(t *testing.T) {
 	for _, filename := range []string{
+		"testdata/ashland.gpx",
 		"testdata/fells_loop.gpx",
 	} {
 		f, err := os.Open(filename)
