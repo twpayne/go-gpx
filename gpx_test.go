@@ -718,6 +718,7 @@ func TestParseExamples(t *testing.T) {
 	for _, filename := range []string{
 		"testdata/ashland.gpx",
 		"testdata/fells_loop.gpx",
+		"testdata/mystic_basin_trail.gpx",
 	} {
 		f, err := os.Open(filename)
 		if err != nil {
