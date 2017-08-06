@@ -1,14 +1,15 @@
-# go-gpx
+package gpx_test
 
-[![Build Status](https://travis-ci.org/twpayne/go-gpx.svg?branch=master)](https://travis-ci.org/twpayne/go-gpx)
-[![GoDoc](https://godoc.org/github.com/twpayne/go-gpx?status.svg)](https://godoc.org/github.com/twpayne/go-gpx)
-[![Report Card](https://goreportcard.com/badge/github.com/twpayne/go-gpx)](https://goreportcard.com/report/github.com/twpayne/go-gpx)
+import (
+	"bytes"
+	"fmt"
+	"os"
+	"time"
 
-Package go-gpx provides convenince methods for reading and writing GPX documents.
+	"github.com/twpayne/go-gpx"
+)
 
-Read example:
-
-```go
+func ExampleRead() {
 	r := bytes.NewBufferString("<gpx" +
 		" version=\"1.0\"" +
 		" creator=\"ExpertGPS 1.1 - http://www.topografix.com\"" +
@@ -32,11 +33,9 @@ Read example:
 	fmt.Printf("t.Wpt[0] == %+v", t.Wpt[0])
 	// Output:
 	// t.Wpt[0] == &{Lat:42.438878 Lon:-71.119277 Ele:44.586548 Time:2001-11-28 21:05:28 +0000 UTC MagVar:0 GeoidHeight:0 Name:5066 Cmt: Desc:5066 Src: Link:[] Sym:Crossing Type:Crossing Fix: Sat:0 HDOP:0 VDOP:0 PDOP:0 AgeOfGPSData:0 DGPSID:[] Extensions:<nil>}
-```
+}
 
-Write example:
-
-```go
+func ExampleGPX_WriteIndent() {
 	g := &gpx.GPX{
 		Version: "1.0",
 		Creator: "ExpertGPS 1.1 - http://www.topografix.com",
@@ -67,6 +66,4 @@ Write example:
 	//     <type>Crossing</type>
 	//   </wpt>
 	// </gpx>
-```
-
-[License](LICENSE)
+}
