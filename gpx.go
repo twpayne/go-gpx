@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/twpayne/go-geom"
+	geom "github.com/twpayne/go-geom"
 	"golang.org/x/net/html/charset"
 )
 
@@ -43,14 +43,16 @@ type ExtensionsType struct {
 
 // A GPX is a gpxType.
 type GPX struct {
-	XMLName    string          `xml:"gpx"`
-	Version    string          `xml:"version,attr"`
-	Creator    string          `xml:"creator,attr"`
-	Metadata   *MetadataType   `xml:"metadata,omitempty"`
-	Wpt        []*WptType      `xml:"wpt,omitempty"`
-	Rte        []*RteType      `xml:"rte,omitempty"`
-	Trk        []*TrkType      `xml:"trk,omitempty"`
-	Extensions *ExtensionsType `xml:"extensions"`
+	XMLName      string            `xml:"gpx"`
+	XMLSchemaLoc string            `xml:"xsi:schemaLocation,attr"`
+	XMLAttrs     map[string]string `xml:"-"`
+	Version      string            `xml:"version,attr"`
+	Creator      string            `xml:"creator,attr"`
+	Metadata     *MetadataType     `xml:"metadata,omitempty"`
+	Wpt          []*WptType        `xml:"wpt,omitempty"`
+	Rte          []*RteType        `xml:"rte,omitempty"`
+	Trk          []*TrkType        `xml:"trk,omitempty"`
+	Extensions   *ExtensionsType   `xml:"extensions"`
 }
 
 // A LinkType is a linkType.
@@ -466,30 +468,37 @@ func (w *WptType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 // MarshalXML implements xml.Marshaler.MarshalXML.
 func (g *GPX) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	baseURL := "http://www.topografix.com/GPX/" + strings.Join(strings.Split(g.Version, "."), "/")
+	attr := []xml.Attr{
+		{
+			Name:  xml.Name{Local: "version"},
+			Value: g.Version,
+		},
+		{
+			Name:  xml.Name{Local: "creator"},
+			Value: g.Creator,
+		},
+		{
+			Name:  xml.Name{Local: "xmlns:xsi"},
+			Value: "http://www.w3.org/2001/XMLSchema-instance",
+		},
+		{
+			Name:  xml.Name{Local: "xmlns"},
+			Value: baseURL,
+		},
+		{
+			Name:  xml.Name{Local: "xsi:schemaLocation"},
+			Value: baseURL + " " + baseURL + "/gpx.xsd " + g.XMLSchemaLoc,
+		},
+	}
+	for k, v := range g.XMLAttrs {
+		attr = append(attr, xml.Attr{
+			Name:  xml.Name{Local: k},
+			Value: v,
+		})
+	}
 	start = xml.StartElement{
 		Name: xml.Name{Local: "gpx"},
-		Attr: []xml.Attr{
-			{
-				Name:  xml.Name{Local: "version"},
-				Value: g.Version,
-			},
-			{
-				Name:  xml.Name{Local: "creator"},
-				Value: g.Creator,
-			},
-			{
-				Name:  xml.Name{Local: "xmlns:xsi"},
-				Value: "http://www.w3.org/2001/XMLSchema-instance",
-			},
-			{
-				Name:  xml.Name{Local: "xmlns"},
-				Value: baseURL,
-			},
-			{
-				Name:  xml.Name{Local: "xsi:schemaLocation"},
-				Value: baseURL + " " + baseURL + "/gpx.xsd",
-			},
-		},
+		Attr: attr,
 	}
 	if err := e.EncodeToken(start); err != nil {
 		return err
