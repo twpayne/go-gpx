@@ -400,6 +400,11 @@ func (w *WptType) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 			return err
 		}
 	}
+	if w.Extensions != nil {
+		if err := e.EncodeElement(w.Extensions, xml.StartElement{Name: xml.Name{Local: "extensions"}}); err != nil {
+			return err
+		}
+	}
 	// FIXME Encode extensions
 	return e.EncodeToken(start.End())
 }
