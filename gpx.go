@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	geom "github.com/twpayne/go-geom"
+	"github.com/twpayne/go-geom"
 	"golang.org/x/net/html/charset"
 )
 
