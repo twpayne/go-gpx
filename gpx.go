@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	geom "github.com/twpayne/go-geom"
+	"github.com/twpayne/go-geom"
 	"golang.org/x/net/html/charset"
 )
 
@@ -43,16 +43,16 @@ type ExtensionsType struct {
 
 // A GPX is a gpxType.
 type GPX struct {
-	XMLName      string            `xml:"gpx"`
-	XMLSchemaLoc string            `xml:"xsi:schemaLocation,attr"`
-	XMLAttrs     map[string]string `xml:"-"`
-	Version      string            `xml:"version,attr"`
-	Creator      string            `xml:"creator,attr"`
-	Metadata     *MetadataType     `xml:"metadata,omitempty"`
-	Wpt          []*WptType        `xml:"wpt,omitempty"`
-	Rte          []*RteType        `xml:"rte,omitempty"`
-	Trk          []*TrkType        `xml:"trk,omitempty"`
-	Extensions   *ExtensionsType   `xml:"extensions"`
+	XMLName           string            `xml:"gpx"`
+	XMLSchemaLoctions []string          `xml:"xsi:schemaLocation,attr"`
+	XMLAttrs          map[string]string `xml:"-"`
+	Version           string            `xml:"version,attr"`
+	Creator           string            `xml:"creator,attr"`
+	Metadata          *MetadataType     `xml:"metadata,omitempty"`
+	Wpt               []*WptType        `xml:"wpt,omitempty"`
+	Rte               []*RteType        `xml:"rte,omitempty"`
+	Trk               []*TrkType        `xml:"trk,omitempty"`
+	Extensions        *ExtensionsType   `xml:"extensions"`
 }
 
 // A LinkType is a linkType.
@@ -405,7 +405,6 @@ func (w *WptType) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 			return err
 		}
 	}
-	// FIXME Encode extensions
 	return e.EncodeToken(start.End())
 }
 
@@ -473,6 +472,10 @@ func (w *WptType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 // MarshalXML implements xml.Marshaler.MarshalXML.
 func (g *GPX) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	baseURL := "http://www.topografix.com/GPX/" + strings.Join(strings.Split(g.Version, "."), "/")
+	xmlSchemaLocations := append([]string{
+		baseURL,
+		baseURL + "/gpx.xsd",
+	}, g.XMLSchemaLoctions...)
 	attr := []xml.Attr{
 		{
 			Name:  xml.Name{Local: "version"},
@@ -492,7 +495,7 @@ func (g *GPX) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 		},
 		{
 			Name:  xml.Name{Local: "xsi:schemaLocation"},
-			Value: baseURL + " " + baseURL + "/gpx.xsd " + g.XMLSchemaLoc,
+			Value: strings.Join(xmlSchemaLocations, " "),
 		},
 	}
 	for k, v := range g.XMLAttrs {
