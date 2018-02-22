@@ -405,7 +405,6 @@ func (w *WptType) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 			return err
 		}
 	}
-	// FIXME Encode extensions
 	return e.EncodeToken(start.End())
 }
 
