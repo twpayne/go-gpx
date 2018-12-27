@@ -119,6 +119,8 @@ type WptType struct {
 	Lat          float64
 	Lon          float64
 	Ele          float64
+	Speed        float64
+	Course       float64
 	Time         time.Time
 	MagVar       float64
 	GeoidHeight  float64
@@ -343,6 +345,16 @@ func (w *WptType) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	if err := maybeEmitFloatElement(e, "ele", w.Ele); err != nil {
 		return err
 	}
+	if w.Speed > 0 {
+		if err := maybeEmitFloatElement(e, "speed", w.Speed); err != nil {
+			return err
+		}
+	}
+	if w.Course > 0 {
+		if err := maybeEmitFloatElement(e, "course", w.Course); err != nil {
+			return err
+		}
+	}
 	if !w.Time.IsZero() {
 		if err := maybeEmitStringElement(e, "time", w.Time.UTC().Format(timeLayout)); err != nil {
 			return err
@@ -414,6 +426,8 @@ func (w *WptType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 		Lat          float64         `xml:"lat,attr"`
 		Lon          float64         `xml:"lon,attr"`
 		Ele          float64         `xml:"ele"`
+		Speed        float64         `xml:"speed"`
+		Course       float64         `xml:"course"`
 		Time         string          `xml:"time"`
 		MagVar       float64         `xml:"magvar"`
 		GeoidHeight  float64         `xml:"geoidheight"`
@@ -440,6 +454,8 @@ func (w *WptType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 		Lat:          e.Lat,
 		Lon:          e.Lon,
 		Ele:          e.Ele,
+		Speed:        e.Speed,
+		Course:       e.Course,
 		MagVar:       e.MagVar,
 		GeoidHeight:  e.GeoidHeight,
 		Name:         e.Name,
