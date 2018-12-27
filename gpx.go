@@ -345,15 +345,11 @@ func (w *WptType) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	if err := maybeEmitFloatElement(e, "ele", w.Ele); err != nil {
 		return err
 	}
-	if w.Speed > 0 {
-		if err := maybeEmitFloatElement(e, "speed", w.Speed); err != nil {
-			return err
-		}
+	if err := maybeEmitFloatElement(e, "speed", w.Speed); err != nil {
+		return err
 	}
-	if w.Course > 0 {
-		if err := maybeEmitFloatElement(e, "course", w.Course); err != nil {
-			return err
-		}
+	if err := maybeEmitFloatElement(e, "course", w.Course); err != nil {
+		return err
 	}
 	if !w.Time.IsZero() {
 		if err := maybeEmitStringElement(e, "time", w.Time.UTC().Format(timeLayout)); err != nil {
