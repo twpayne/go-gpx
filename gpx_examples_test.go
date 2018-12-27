@@ -14,6 +14,7 @@ func ExampleRead() {
 		<gpx version="1.0" creator="ExpertGPS 1.1 - http://www.topografix.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.topografix.com/GPX/1/0" xsi:schemaLocation="http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd">
 		  <wpt lat="42.438878" lon="-71.119277">
 			<ele>44.586548</ele>
+			<speed>9.16</speed>
 			<time>2001-11-28T21:05:28Z</time>
 			<name>5066</name>
 			<desc>5066</desc>
@@ -29,7 +30,7 @@ func ExampleRead() {
 	}
 	fmt.Printf("t.Wpt[0] == %+v", t.Wpt[0])
 	// Output:
-	// t.Wpt[0] == &{Lat:42.438878 Lon:-71.119277 Ele:44.586548 Time:2001-11-28 21:05:28 +0000 UTC MagVar:0 GeoidHeight:0 Name:5066 Cmt: Desc:5066 Src: Link:[] Sym:Crossing Type:Crossing Fix: Sat:0 HDOP:0 VDOP:0 PDOP:0 AgeOfGPSData:0 DGPSID:[] Extensions:<nil>}
+	// t.Wpt[0] == &{Lat:42.438878 Lon:-71.119277 Ele:44.586548 Speed:9.16 Course:0 Time:2001-11-28 21:05:28 +0000 UTC MagVar:0 GeoidHeight:0 Name:5066 Cmt: Desc:5066 Src: Link:[] Sym:Crossing Type:Crossing Fix: Sat:0 HDOP:0 VDOP:0 PDOP:0 AgeOfGPSData:0 DGPSID:[] Extensions:<nil>}
 }
 
 func ExampleGPX_WriteIndent() {
