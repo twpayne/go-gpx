@@ -671,3 +671,35 @@ func TestParseExamples(t *testing.T) {
 		f.Close()
 	}
 }
+
+func TestCoprightTypeYear(t *testing.T) {
+	for _, tc := range []struct {
+		data []byte
+		year int
+	}{
+		{
+			data: []byte("<copyright><year>2019Z</year></copyright>"),
+			year: 2019,
+		},
+		{
+			data: []byte("<copyright><year>2013</year></copyright>"),
+			year: 2013,
+		},
+		{
+			data: []byte("<copyright><year>2011+05:00</year></copyright>"),
+			year: 2011,
+		},
+		{
+			data: []byte("<copyright><year>2010-07:00</year></copyright>"),
+			year: 2010,
+		},
+	}{
+		dest := CopyrightType{}
+		err := xml.Unmarshal(tc.data, &dest)
+		if err != nil {
+			t.Errorf("Couldn't parse year %s", string(tc.data))
+		} else if dest.Year != tc.year {
+			t.Errorf("Copyright year '%s' expected %d got %d", string(tc.data), tc.year, dest.Year)
+		}
+	}
+}

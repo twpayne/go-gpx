@@ -5,6 +5,7 @@ package gpx
 
 import (
 	"encoding/xml"
+	"fmt"
 	"io"
 	"strconv"
 	"strings"
@@ -34,6 +35,39 @@ type CopyrightType struct {
 	Author  string `xml:"author,attr"`
 	Year    int    `xml:"year,omitempty"`
 	License string `xml:"license,omitempty"`
+}
+
+func (c *CopyrightType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	alias := struct {
+		Author  string `xml:"author,attr"`
+		Year    string `xml:"year,omitempty"`
+		License string `xml:"license,omitempty"`
+	}{}
+
+	err := d.DecodeElement(&alias, &start)
+	if err != nil {
+		return err
+	}
+
+	c.Author = alias.Author
+	c.License = alias.License
+
+	layouts := []string{
+		"2006",
+		"2006Z",
+		"2006-07:00",
+	}
+
+	for _, layout := range layouts {
+		var date time.Time
+		date, err = time.Parse(layout, alias.Year)
+		if err == nil {
+			c.Year = date.Year()
+			return nil
+		}
+	}
+
+	return fmt.Errorf("Couldn't parse Copyright year: %s", alias.Year)
 }
 
 // An ExtensionsType contains elements from another schema.
