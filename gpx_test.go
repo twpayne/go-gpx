@@ -693,7 +693,7 @@ func TestCoprightTypeYear(t *testing.T) {
 			data: []byte("<copyright><year>2010-07:00</year></copyright>"),
 			year: 2010,
 		},
-	}{
+	} {
 		dest := CopyrightType{}
 		err := xml.Unmarshal(tc.data, &dest)
 		if err != nil {
