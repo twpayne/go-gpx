@@ -68,7 +68,7 @@ func (c *CopyrightType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) err
 		}
 	}
 
-	return fmt.Errorf("Couldn't parse Copyright year: %s", alias.Year)
+	return fmt.Errorf("couldn't parse Copyright year: %s", alias.Year)
 }
 
 // An ExtensionsType contains elements from another schema.
