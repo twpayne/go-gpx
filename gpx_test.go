@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/d4l3k/messagediff"
-	"github.com/twpayne/go-geom"
+	geom "github.com/twpayne/go-geom"
 )
 
 func TestWpt(t *testing.T) {

@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/twpayne/go-geom"
+	geom "github.com/twpayne/go-geom"
 	"golang.org/x/net/html/charset"
 )
 
