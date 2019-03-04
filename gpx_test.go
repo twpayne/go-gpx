@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/d4l3k/messagediff"
-	"github.com/twpayne/go-geom"
+	"github.com/stretchr/testify/assert"
+	geom "github.com/twpayne/go-geom"
 )
 
 func TestWpt(t *testing.T) {
@@ -136,35 +136,20 @@ func TestWpt(t *testing.T) {
 		},
 	} {
 		var gotWpt WptType
-		if err := xml.Unmarshal([]byte(tc.data), &gotWpt); err != nil {
-			t.Errorf("xml.Unmarshal([]byte(%q), &gotWpt) == %v, want nil", tc.data, err)
-		}
-		if diff, equal := messagediff.PrettyDiff(tc.wpt, &gotWpt); !equal {
-			t.Errorf("xml.Unmarshal([]byte(%q), &gotWpt); got == %#v, diff\n%s", tc.data, gotWpt, diff)
-		}
+		assert.NoError(t, xml.Unmarshal([]byte(tc.data), &gotWpt))
+		assert.Equal(t, tc.wpt, &gotWpt)
 		if tc.layout != geom.NoLayout {
-			gotG := tc.wpt.Geom(tc.layout)
-			if diff, equal := messagediff.PrettyDiff(tc.g, gotG); !equal {
-				t.Errorf("%#v.Geom() == %#v, diff\n%s", tc.wpt, gotG, diff)
-			}
+			assert.Equal(t, tc.g, tc.wpt.Geom(tc.layout))
 		}
 		if !tc.noTestMarshal {
 			var b bytes.Buffer
 			e := xml.NewEncoder(&b)
 			e.Indent("", "\t")
-			start := xml.StartElement{Name: xml.Name{Local: "wpt"}}
-			if err := e.EncodeElement(tc.wpt, start); err != nil {
-				t.Errorf("e.EncodeElement(%#v, %#v) == _, %v, want _, nil", tc.wpt, start, err)
-			}
-			if diff, equal := messagediff.PrettyDiff(strings.Split(tc.data, "\n"), strings.Split(b.String(), "\n")); !equal {
-				t.Errorf("xml.Marshal(%#v) == %q, nil, want %q, diff\n%s", tc.wpt, b.String(), tc.data, diff)
-			}
+			assert.NoError(t, e.EncodeElement(tc.wpt, xml.StartElement{Name: xml.Name{Local: "wpt"}}))
+			assert.Equal(t, strings.Split(tc.data, "\n"), strings.Split(b.String(), "\n"))
 		}
 		if !tc.noTestNew {
-			gotWpt := NewWptType(tc.g)
-			if diff, equal := messagediff.PrettyDiff(tc.wpt, gotWpt); !equal {
-				t.Errorf("NewWptType(%#v) == %#v, want %#v, diff\n%s", tc.g, gotWpt, tc.wpt, diff)
-			}
+			assert.Equal(t, tc.wpt, NewWptType(tc.g))
 		}
 	}
 }
@@ -362,35 +347,20 @@ func TestRte(t *testing.T) {
 		},
 	} {
 		var gotRte RteType
-		if err := xml.Unmarshal([]byte(tc.data), &gotRte); err != nil {
-			t.Errorf("xml.Unmarshal([]byte(%q), &gotRte) == %v, want nil", tc.data, err)
-		}
-		if diff, equal := messagediff.PrettyDiff(tc.rte, &gotRte); !equal {
-			t.Errorf("xml.Unmarshal([]byte(%q), &gotRte); got == %#v, diff\n%s", tc.data, gotRte, diff)
-		}
+		assert.NoError(t, xml.Unmarshal([]byte(tc.data), &gotRte))
+		assert.Equal(t, tc.rte, &gotRte)
 		if tc.layout != geom.NoLayout {
-			gotG := tc.rte.Geom(tc.layout)
-			if diff, equal := messagediff.PrettyDiff(tc.g, gotG); !equal {
-				t.Errorf("%#v.Geom() == %#v, diff\n%s", tc.rte, gotG, diff)
-			}
+			assert.Equal(t, tc.g, tc.rte.Geom(tc.layout))
 		}
 		if !tc.noTestMarshal {
 			var b bytes.Buffer
 			e := xml.NewEncoder(&b)
 			e.Indent("", "\t")
-			start := xml.StartElement{Name: xml.Name{Local: "rte"}}
-			if err := e.EncodeElement(tc.rte, start); err != nil {
-				t.Errorf("e.EncodeElement(%#v, %#v) == _, %v, want _, nil", tc.rte, start, err)
-			}
-			if diff, equal := messagediff.PrettyDiff(strings.Split(tc.data, "\n"), strings.Split(b.String(), "\n")); !equal {
-				t.Errorf("xml.Marshal(%#v) == %q, nil, want %q, diff\n%s", tc.rte, b.String(), tc.data, diff)
-			}
+			assert.NoError(t, e.EncodeElement(tc.rte, xml.StartElement{Name: xml.Name{Local: "rte"}}))
+			assert.Equal(t, strings.Split(tc.data, "\n"), strings.Split(b.String(), "\n"))
 		}
 		if !tc.noTestNew {
-			gotRte := NewRteType(tc.g)
-			if diff, equal := messagediff.PrettyDiff(tc.rte, gotRte); !equal {
-				t.Errorf("NewRteType(%#v) == %#v, want %#v, diff\n%s", tc.g, gotRte, tc.rte, diff)
-			}
+			assert.Equal(t, tc.rte, NewRteType(tc.g))
 		}
 	}
 }
@@ -460,35 +430,20 @@ func TestTrk(t *testing.T) {
 		},
 	} {
 		var gotTrk TrkType
-		if err := xml.Unmarshal([]byte(tc.data), &gotTrk); err != nil {
-			t.Errorf("xml.Unmarshal([]byte(%q), &gotTrk) == %v, want nil", tc.data, err)
-		}
-		if diff, equal := messagediff.PrettyDiff(tc.trk, &gotTrk); !equal {
-			t.Errorf("xml.Unmarshal([]byte(%q), &gotTrk); got == %#v, diff\n%s", tc.data, gotTrk, diff)
-		}
+		assert.NoError(t, xml.Unmarshal([]byte(tc.data), &gotTrk))
+		assert.Equal(t, tc.trk, &gotTrk)
 		if tc.layout != geom.NoLayout {
-			gotG := tc.trk.Geom(tc.layout)
-			if diff, equal := messagediff.PrettyDiff(tc.g, gotG); !equal {
-				t.Errorf("%#v.Geom() == %#v, diff\n%s", tc.trk, gotG, diff)
-			}
+			assert.Equal(t, tc.g, tc.trk.Geom(tc.layout))
 		}
 		if !tc.noTestMarshal {
 			var b bytes.Buffer
 			e := xml.NewEncoder(&b)
 			e.Indent("", "\t")
-			start := xml.StartElement{Name: xml.Name{Local: "trk"}}
-			if err := e.EncodeElement(tc.trk, start); err != nil {
-				t.Errorf("e.EncodeElement(%#v, %#v) == _, %v, want _, nil", tc.trk, start, err)
-			}
-			if diff, equal := messagediff.PrettyDiff(strings.Split(tc.data, "\n"), strings.Split(b.String(), "\n")); !equal {
-				t.Errorf("xml.Marshal(%#v) == %q, nil, want %q, diff\n%s", tc.trk, b.String(), tc.data, diff)
-			}
+			assert.NoError(t, e.EncodeElement(tc.trk, xml.StartElement{Name: xml.Name{Local: "trk"}}))
+			assert.Equal(t, strings.Split(tc.data, "\n"), strings.Split(b.String(), "\n"))
 		}
 		if !tc.noTestNew {
-			gotTrk := NewTrkType(tc.g)
-			if diff, equal := messagediff.PrettyDiff(tc.trk, gotTrk); !equal {
-				t.Errorf("NewTrkType(%#v) == %#v, want %#v, diff\n%s", tc.g, gotTrk, tc.trk, diff)
-			}
+			assert.Equal(t, tc.trk, NewTrkType(tc.g))
 		}
 	}
 }
@@ -611,19 +566,11 @@ func TestRoundTrip(t *testing.T) {
 		},
 	} {
 		got, err := Read(bytes.NewBufferString(tc.data))
-		if err != nil {
-			t.Errorf("Read(bytes.NewBuffer(%v)) == _, %v, want _, nil", tc.data, err)
-		}
-		if diff, equal := messagediff.PrettyDiff(tc.gpx, got); !equal {
-			t.Errorf("xml.Unmarshal([]byte(%q), &got); got == %#v, diff\n%s", tc.data, got, diff)
-		}
+		assert.NoError(t, err)
+		assert.Equal(t, tc.gpx, got)
 		b := &bytes.Buffer{}
-		if err := tc.gpx.WriteIndent(b, "", "\t"); err != nil {
-			t.Errorf("%#v.WriteIndent(...) == %v, want nil", tc.gpx, err)
-		}
-		if diff, equal := messagediff.PrettyDiff(strings.Split(tc.data, "\n"), strings.Split(b.String(), "\n")); !equal {
-			t.Errorf("xml.Marshal(%#v) ==\n%s\nwant\n%s\ndiff\n%s", tc.gpx, b.String(), tc.data, diff)
-		}
+		assert.NoError(t, tc.gpx.WriteIndent(b, "", "\t"))
+		assert.Equal(t, strings.Split(tc.data, "\n"), strings.Split(b.String(), "\n"))
 	}
 }
 
@@ -645,12 +592,8 @@ func TestTime(t *testing.T) {
 			m: 1136214245.5,
 		},
 	} {
-		if gotM := timeToM(tc.t); gotM != tc.m {
-			t.Errorf("timeToM(%v) == %v, want %v", tc.t, gotM, tc.m)
-		}
-		if gotT := mToTime(tc.m); gotT != tc.t {
-			t.Errorf("mToTime(%v) == %v, want %v", tc.m, gotT, tc.t)
-		}
+		assert.Equal(t, tc.m, timeToM(tc.t))
+		assert.Equal(t, tc.t, mToTime(tc.m))
 	}
 }
 
@@ -660,15 +603,13 @@ func TestParseExamples(t *testing.T) {
 		"testdata/fells_loop.gpx",
 		"testdata/mystic_basin_trail.gpx",
 	} {
-		f, err := os.Open(filename)
-		if err != nil {
-			t.Fatalf("os.Open(%q) == _, %v, want _, <nil>", filename, err)
-		}
-		if _, err := Read(f); err != nil {
-			f.Close()
-			t.Errorf("%s: Read(...) == _, %v, want _, nil", filename, err)
-		}
-		f.Close()
+		t.Run(filename, func(t *testing.T) {
+			f, err := os.Open(filename)
+			assert.NoError(t, err)
+			defer f.Close()
+			_, err = Read(f)
+			assert.NoError(t, err)
+		})
 	}
 }
 
@@ -694,12 +635,8 @@ func TestCoprightTypeYear(t *testing.T) {
 			year: 2010,
 		},
 	} {
-		dest := CopyrightType{}
-		err := xml.Unmarshal(tc.data, &dest)
-		if err != nil {
-			t.Errorf("Couldn't parse year %s", string(tc.data))
-		} else if dest.Year != tc.year {
-			t.Errorf("Copyright year '%s' expected %d got %d", string(tc.data), tc.year, dest.Year)
-		}
+		var gotCopyright CopyrightType
+		assert.NoError(t, xml.Unmarshal(tc.data, &gotCopyright))
+		assert.Equal(t, tc.year, gotCopyright.Year)
 	}
 }

@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/twpayne/go-geom"
+	geom "github.com/twpayne/go-geom"
 	"golang.org/x/net/html/charset"
 )
 
@@ -35,39 +35,6 @@ type CopyrightType struct {
 	Author  string `xml:"author,attr"`
 	Year    int    `xml:"year,omitempty"`
 	License string `xml:"license,omitempty"`
-}
-
-func (c *CopyrightType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-	alias := struct {
-		Author  string `xml:"author,attr"`
-		Year    string `xml:"year,omitempty"`
-		License string `xml:"license,omitempty"`
-	}{}
-
-	err := d.DecodeElement(&alias, &start)
-	if err != nil {
-		return err
-	}
-
-	c.Author = alias.Author
-	c.License = alias.License
-
-	layouts := []string{
-		"2006",
-		"2006Z",
-		"2006-07:00",
-	}
-
-	for _, layout := range layouts {
-		var date time.Time
-		date, err = time.Parse(layout, alias.Year)
-		if err == nil {
-			c.Year = date.Year()
-			return nil
-		}
-	}
-
-	return fmt.Errorf("Couldn't parse Copyright year: %s", alias.Year)
 }
 
 // An ExtensionsType contains elements from another schema.
@@ -175,47 +142,38 @@ type WptType struct {
 	Extensions   *ExtensionsType
 }
 
-func mToTime(m float64) time.Time {
-	if m == 0 {
-		return time.Unix(0, 0)
+// UnmarshalXML implements xml.Unmarshaler.UnmarshalXML.
+func (c *CopyrightType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	alias := struct {
+		Author  string `xml:"author,attr"`
+		Year    string `xml:"year,omitempty"`
+		License string `xml:"license,omitempty"`
+	}{}
+
+	err := d.DecodeElement(&alias, &start)
+	if err != nil {
+		return err
 	}
-	return time.Unix(int64(m), int64(m*float64(time.Second))%int64(time.Second)).UTC()
-}
 
-func timeToM(t time.Time) float64 {
-	if t.IsZero() {
-		return 0
+	c.Author = alias.Author
+	c.License = alias.License
+
+	layouts := []string{
+		"2006",
+		"2006Z",
+		"2006-07:00",
 	}
-	return float64(t.UnixNano()) / float64(time.Second)
-}
 
-func emitIntElement(e *xml.Encoder, localName string, value int) error {
-	return emitStringElement(e, localName, strconv.Itoa(value))
-}
-
-func emitStringElement(e *xml.Encoder, localName, value string) error {
-	return e.EncodeElement(value, xml.StartElement{Name: xml.Name{Local: localName}})
-}
-
-func maybeEmitFloatElement(e *xml.Encoder, localName string, value float64) error {
-	if value == 0.0 {
-		return nil
+	for _, layout := range layouts {
+		var date time.Time
+		date, err = time.Parse(layout, alias.Year)
+		if err == nil {
+			c.Year = date.Year()
+			return nil
+		}
 	}
-	return emitStringElement(e, localName, strconv.FormatFloat(value, 'f', -1, 64))
-}
 
-func maybeEmitIntElement(e *xml.Encoder, localName string, value int) error {
-	if value == 0 {
-		return nil
-	}
-	return emitIntElement(e, localName, value)
-}
-
-func maybeEmitStringElement(e *xml.Encoder, localName, value string) error {
-	if value == "" {
-		return nil
-	}
-	return emitStringElement(e, localName, value)
+	return fmt.Errorf("couldn't parse Copyright year: %s", alias.Year)
 }
 
 // Read reads a new GPX from r.
@@ -224,6 +182,63 @@ func Read(r io.Reader) (*GPX, error) {
 	d := xml.NewDecoder(r)
 	d.CharsetReader = charset.NewReaderLabel
 	return gpx, d.Decode(gpx)
+}
+
+// MarshalXML implements xml.Marshaler.MarshalXML.
+func (g *GPX) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	baseURL := "http://www.topografix.com/GPX/" + strings.Join(strings.Split(g.Version, "."), "/")
+	xmlSchemaLocations := append([]string{
+		baseURL,
+		baseURL + "/gpx.xsd",
+	}, g.XMLSchemaLoctions...)
+	attr := []xml.Attr{
+		{
+			Name:  xml.Name{Local: "version"},
+			Value: g.Version,
+		},
+		{
+			Name:  xml.Name{Local: "creator"},
+			Value: g.Creator,
+		},
+		{
+			Name:  xml.Name{Local: "xmlns:xsi"},
+			Value: "http://www.w3.org/2001/XMLSchema-instance",
+		},
+		{
+			Name:  xml.Name{Local: "xmlns"},
+			Value: baseURL,
+		},
+		{
+			Name:  xml.Name{Local: "xsi:schemaLocation"},
+			Value: strings.Join(xmlSchemaLocations, " "),
+		},
+	}
+	for k, v := range g.XMLAttrs {
+		attr = append(attr, xml.Attr{
+			Name:  xml.Name{Local: k},
+			Value: v,
+		})
+	}
+	start = xml.StartElement{
+		Name: xml.Name{Local: "gpx"},
+		Attr: attr,
+	}
+	if err := e.EncodeToken(start); err != nil {
+		return err
+	}
+	if err := e.EncodeElement(g.Metadata, xml.StartElement{Name: xml.Name{Local: "metadata"}}); err != nil {
+		return err
+	}
+	if err := e.EncodeElement(g.Wpt, xml.StartElement{Name: xml.Name{Local: "wpt"}}); err != nil {
+		return err
+	}
+	if err := e.EncodeElement(g.Rte, xml.StartElement{Name: xml.Name{Local: "rte"}}); err != nil {
+		return err
+	}
+	if err := e.EncodeElement(g.Trk, xml.StartElement{Name: xml.Name{Local: "trk"}}); err != nil {
+		return err
+	}
+	return e.EncodeToken(start.End())
 }
 
 // Write writes g to w.
@@ -238,46 +253,20 @@ func (g *GPX) WriteIndent(w io.Writer, prefix, indent string) error {
 	return e.EncodeElement(g, StartElement)
 }
 
-func (w *WptType) appendFlatCoords(flatCoords []float64, layout geom.Layout) []float64 {
-	switch layout {
-	case geom.XY:
-		return append(flatCoords, w.Lon, w.Lat)
-	case geom.XYZ:
-		return append(flatCoords, w.Lon, w.Lat, w.Ele)
-	case geom.XYM:
-		return append(flatCoords, w.Lon, w.Lat, timeToM(w.Time))
-	case geom.XYZM:
-		return append(flatCoords, w.Lon, w.Lat, w.Ele, timeToM(w.Time))
-	default:
-		flatCoords = append(flatCoords, w.Lon, w.Lat, w.Ele, timeToM(w.Time))
-		flatCoords = append(flatCoords, make([]float64, int(layout)-4)...)
-		return flatCoords
+// NewRteType returns a new RteType with geometry g.
+func NewRteType(g *geom.LineString) *RteType {
+	return &RteType{
+		RtePt: newWptTypes(g),
 	}
 }
 
-func newWptTypes(g *geom.LineString) []*WptType {
-	flatCoords := g.FlatCoords()
-	layout := g.Layout()
-	mIndex := layout.MIndex()
-	zIndex := layout.ZIndex()
-	stride := layout.Stride()
-	wpts := make([]*WptType, g.NumCoords())
-	start := 0
-	for i := range wpts {
-		wpt := &WptType{
-			Lat: flatCoords[start+1],
-			Lon: flatCoords[start],
-		}
-		if zIndex != -1 {
-			wpt.Ele = flatCoords[start+zIndex]
-		}
-		if mIndex != -1 {
-			wpt.Time = mToTime(flatCoords[start+mIndex])
-		}
-		start += stride
-		wpts[i] = wpt
+// Geom returns r's geometry.
+func (r *RteType) Geom(layout geom.Layout) *geom.LineString {
+	flatCoords := make([]float64, 0, layout.Stride()*len(r.RtePt))
+	for _, rp := range r.RtePt {
+		flatCoords = rp.appendFlatCoords(flatCoords, layout)
 	}
-	return wpts
+	return geom.NewLineStringFlat(layout, flatCoords)
 }
 
 // NewTrkType returns a new TrkType with geometry g.
@@ -320,22 +309,6 @@ func (ts *TrkSegType) Geom(layout geom.Layout) *geom.LineString {
 	flatCoords := make([]float64, 0, layout.Stride()*len(ts.TrkPt))
 	for _, tp := range ts.TrkPt {
 		flatCoords = tp.appendFlatCoords(flatCoords, layout)
-	}
-	return geom.NewLineStringFlat(layout, flatCoords)
-}
-
-// NewRteType returns a new RteType with geometry g.
-func NewRteType(g *geom.LineString) *RteType {
-	return &RteType{
-		RtePt: newWptTypes(g),
-	}
-}
-
-// Geom returns r's geometry.
-func (r *RteType) Geom(layout geom.Layout) *geom.LineString {
-	flatCoords := make([]float64, 0, layout.Stride()*len(r.RtePt))
-	for _, rp := range r.RtePt {
-		flatCoords = rp.appendFlatCoords(flatCoords, layout)
 	}
 	return geom.NewLineStringFlat(layout, flatCoords)
 }
@@ -515,59 +488,87 @@ func (w *WptType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	return nil
 }
 
-// MarshalXML implements xml.Marshaler.MarshalXML.
-func (g *GPX) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
-	baseURL := "http://www.topografix.com/GPX/" + strings.Join(strings.Split(g.Version, "."), "/")
-	xmlSchemaLocations := append([]string{
-		baseURL,
-		baseURL + "/gpx.xsd",
-	}, g.XMLSchemaLoctions...)
-	attr := []xml.Attr{
-		{
-			Name:  xml.Name{Local: "version"},
-			Value: g.Version,
-		},
-		{
-			Name:  xml.Name{Local: "creator"},
-			Value: g.Creator,
-		},
-		{
-			Name:  xml.Name{Local: "xmlns:xsi"},
-			Value: "http://www.w3.org/2001/XMLSchema-instance",
-		},
-		{
-			Name:  xml.Name{Local: "xmlns"},
-			Value: baseURL,
-		},
-		{
-			Name:  xml.Name{Local: "xsi:schemaLocation"},
-			Value: strings.Join(xmlSchemaLocations, " "),
-		},
+func (w *WptType) appendFlatCoords(flatCoords []float64, layout geom.Layout) []float64 {
+	switch layout {
+	case geom.XY:
+		return append(flatCoords, w.Lon, w.Lat)
+	case geom.XYZ:
+		return append(flatCoords, w.Lon, w.Lat, w.Ele)
+	case geom.XYM:
+		return append(flatCoords, w.Lon, w.Lat, timeToM(w.Time))
+	case geom.XYZM:
+		return append(flatCoords, w.Lon, w.Lat, w.Ele, timeToM(w.Time))
+	default:
+		flatCoords = append(flatCoords, w.Lon, w.Lat, w.Ele, timeToM(w.Time))
+		flatCoords = append(flatCoords, make([]float64, int(layout)-4)...)
+		return flatCoords
 	}
-	for k, v := range g.XMLAttrs {
-		attr = append(attr, xml.Attr{
-			Name:  xml.Name{Local: k},
-			Value: v,
-		})
+}
+
+func emitIntElement(e *xml.Encoder, localName string, value int) error {
+	return emitStringElement(e, localName, strconv.Itoa(value))
+}
+
+func emitStringElement(e *xml.Encoder, localName, value string) error {
+	return e.EncodeElement(value, xml.StartElement{Name: xml.Name{Local: localName}})
+}
+
+func mToTime(m float64) time.Time {
+	if m == 0 {
+		return time.Unix(0, 0)
 	}
-	start = xml.StartElement{
-		Name: xml.Name{Local: "gpx"},
-		Attr: attr,
+	return time.Unix(int64(m), int64(m*float64(time.Second))%int64(time.Second)).UTC()
+}
+
+func maybeEmitFloatElement(e *xml.Encoder, localName string, value float64) error {
+	if value == 0.0 {
+		return nil
 	}
-	if err := e.EncodeToken(start); err != nil {
-		return err
+	return emitStringElement(e, localName, strconv.FormatFloat(value, 'f', -1, 64))
+}
+
+func maybeEmitIntElement(e *xml.Encoder, localName string, value int) error {
+	if value == 0 {
+		return nil
 	}
-	if err := e.EncodeElement(g.Metadata, xml.StartElement{Name: xml.Name{Local: "metadata"}}); err != nil {
-		return err
+	return emitIntElement(e, localName, value)
+}
+
+func maybeEmitStringElement(e *xml.Encoder, localName, value string) error {
+	if value == "" {
+		return nil
 	}
-	if err := e.EncodeElement(g.Wpt, xml.StartElement{Name: xml.Name{Local: "wpt"}}); err != nil {
-		return err
+	return emitStringElement(e, localName, value)
+}
+
+func newWptTypes(g *geom.LineString) []*WptType {
+	flatCoords := g.FlatCoords()
+	layout := g.Layout()
+	mIndex := layout.MIndex()
+	zIndex := layout.ZIndex()
+	stride := layout.Stride()
+	wpts := make([]*WptType, g.NumCoords())
+	start := 0
+	for i := range wpts {
+		wpt := &WptType{
+			Lat: flatCoords[start+1],
+			Lon: flatCoords[start],
+		}
+		if zIndex != -1 {
+			wpt.Ele = flatCoords[start+zIndex]
+		}
+		if mIndex != -1 {
+			wpt.Time = mToTime(flatCoords[start+mIndex])
+		}
+		start += stride
+		wpts[i] = wpt
 	}
-	if err := e.EncodeElement(g.Rte, xml.StartElement{Name: xml.Name{Local: "rte"}}); err != nil {
-		return err
+	return wpts
+}
+
+func timeToM(t time.Time) float64 {
+	if t.IsZero() {
+		return 0
 	}
-	if err := e.EncodeElement(g.Trk, xml.StartElement{Name: xml.Name{Local: "trk"}}); err != nil {
-		return err
-	}
-	return e.EncodeToken(start.End())
+	return float64(t.UnixNano()) / float64(time.Second)
 }
