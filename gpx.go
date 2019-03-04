@@ -37,6 +37,7 @@ type CopyrightType struct {
 	License string `xml:"license,omitempty"`
 }
 
+// UnmarshalXML implements xml.Unmarshaler.UnmarshalXML.
 func (c *CopyrightType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	alias := struct {
 		Author  string `xml:"author,attr"`
