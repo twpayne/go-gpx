@@ -2,15 +2,17 @@ package gpx_test
 
 import (
 	"bytes"
+	"encoding/xml"
 	"fmt"
 	"os"
 	"time"
 
-	"github.com/twpayne/go-gpx"
+	gpx "github.com/twpayne/go-gpx"
 )
 
 func ExampleRead() {
 	r := bytes.NewBufferString(`
+		<?xml version="1.0" encoding="UTF-8"?>
 		<gpx version="1.0" creator="ExpertGPS 1.1 - http://www.topografix.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.topografix.com/GPX/1/0" xsi:schemaLocation="http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd">
 		  <wpt lat="42.438878" lon="-71.119277">
 			<ele>44.586548</ele>
@@ -50,10 +52,14 @@ func ExampleGPX_WriteIndent() {
 			},
 		},
 	}
+	if _, err := os.Stdout.WriteString(xml.Header); err != nil {
+		fmt.Printf("err == %v", err)
+	}
 	if err := g.WriteIndent(os.Stdout, "", "  "); err != nil {
 		fmt.Printf("err == %v", err)
 	}
 	// Output:
+	// <?xml version="1.0" encoding="UTF-8"?>
 	// <gpx version="1.0" creator="ExpertGPS 1.1 - http://www.topografix.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.topografix.com/GPX/1/0" xsi:schemaLocation="http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd">
 	//   <wpt lat="42.438878" lon="-71.119277">
 	//     <ele>44.586548</ele>
