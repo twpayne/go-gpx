@@ -22,6 +22,12 @@ var StartElement = xml.StartElement{
 	Name: xml.Name{Local: "gpx"},
 }
 
+var copyrightYearLayouts = []string{
+	"2006",
+	"2006Z",
+	"2006-07:00",
+}
+
 // A BoundsType is a boundsType.
 type BoundsType struct {
 	MinLat float64 `xml:"minlat,attr"`
@@ -158,13 +164,7 @@ func (c *CopyrightType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) err
 	c.Author = alias.Author
 	c.License = alias.License
 
-	layouts := []string{
-		"2006",
-		"2006Z",
-		"2006-07:00",
-	}
-
-	for _, layout := range layouts {
+	for _, layout := range copyrightYearLayouts {
 		var date time.Time
 		date, err = time.Parse(layout, alias.Year)
 		if err == nil {
