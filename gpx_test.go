@@ -142,11 +142,11 @@ func TestWpt(t *testing.T) {
 			assert.Equal(t, tc.g, tc.wpt.Geom(tc.layout))
 		}
 		if !tc.noTestMarshal {
-			var b bytes.Buffer
-			e := xml.NewEncoder(&b)
+			sb := &strings.Builder{}
+			e := xml.NewEncoder(sb)
 			e.Indent("", "\t")
 			assert.NoError(t, e.EncodeElement(tc.wpt, xml.StartElement{Name: xml.Name{Local: "wpt"}}))
-			assert.Equal(t, strings.Split(tc.data, "\n"), strings.Split(b.String(), "\n"))
+			assert.Equal(t, strings.Split(tc.data, "\n"), strings.Split(sb.String(), "\n"))
 		}
 		if !tc.noTestNew {
 			assert.Equal(t, tc.wpt, NewWptType(tc.g))
@@ -353,11 +353,11 @@ func TestRte(t *testing.T) {
 			assert.Equal(t, tc.g, tc.rte.Geom(tc.layout))
 		}
 		if !tc.noTestMarshal {
-			var b bytes.Buffer
-			e := xml.NewEncoder(&b)
+			sb := &strings.Builder{}
+			e := xml.NewEncoder(sb)
 			e.Indent("", "\t")
 			assert.NoError(t, e.EncodeElement(tc.rte, xml.StartElement{Name: xml.Name{Local: "rte"}}))
-			assert.Equal(t, strings.Split(tc.data, "\n"), strings.Split(b.String(), "\n"))
+			assert.Equal(t, strings.Split(tc.data, "\n"), strings.Split(sb.String(), "\n"))
 		}
 		if !tc.noTestNew {
 			assert.Equal(t, tc.rte, NewRteType(tc.g))
@@ -436,11 +436,11 @@ func TestTrk(t *testing.T) {
 			assert.Equal(t, tc.g, tc.trk.Geom(tc.layout))
 		}
 		if !tc.noTestMarshal {
-			var b bytes.Buffer
-			e := xml.NewEncoder(&b)
+			sb := &strings.Builder{}
+			e := xml.NewEncoder(sb)
 			e.Indent("", "\t")
 			assert.NoError(t, e.EncodeElement(tc.trk, xml.StartElement{Name: xml.Name{Local: "trk"}}))
-			assert.Equal(t, strings.Split(tc.data, "\n"), strings.Split(b.String(), "\n"))
+			assert.Equal(t, strings.Split(tc.data, "\n"), strings.Split(sb.String(), "\n"))
 		}
 		if !tc.noTestNew {
 			assert.Equal(t, tc.trk, NewTrkType(tc.g))
@@ -568,9 +568,9 @@ func TestRoundTrip(t *testing.T) {
 		got, err := Read(bytes.NewBufferString(tc.data))
 		assert.NoError(t, err)
 		assert.Equal(t, tc.gpx, got)
-		b := &bytes.Buffer{}
-		assert.NoError(t, tc.gpx.WriteIndent(b, "", "\t"))
-		assert.Equal(t, strings.Split(tc.data, "\n"), strings.Split(b.String(), "\n"))
+		sb := &strings.Builder{}
+		assert.NoError(t, tc.gpx.WriteIndent(sb, "", "\t"))
+		assert.Equal(t, strings.Split(tc.data, "\n"), strings.Split(sb.String(), "\n"))
 	}
 }
 
