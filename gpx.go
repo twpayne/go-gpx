@@ -123,29 +123,29 @@ type TrkType struct {
 
 // A WptType is a wptType.
 type WptType struct {
-	Lat          float64
-	Lon          float64
-	Ele          float64
-	Speed        float64
-	Course       float64
-	Time         time.Time
-	MagVar       float64
-	GeoidHeight  float64
-	Name         string
-	Cmt          string
-	Desc         string
-	Src          string
-	Link         []*LinkType
-	Sym          string
-	Type         string
-	Fix          string
-	Sat          int
-	HDOP         float64
-	VDOP         float64
-	PDOP         float64
-	AgeOfGPSData float64
-	DGPSID       []int
-	Extensions   *ExtensionsType
+	Lat           float64
+	Lon           float64
+	Ele           float64
+	Speed         float64
+	Course        float64
+	Time          time.Time
+	MagVar        float64
+	GeoidHeight   float64
+	Name          string
+	Cmt           string
+	Desc          string
+	Src           string
+	Link          []*LinkType
+	Sym           string
+	Type          string
+	Fix           string
+	Sat           int
+	HDOP          float64
+	VDOP          float64
+	PDOP          float64
+	AgeOfDGPSData float64
+	DGPSID        []int
+	Extensions    *ExtensionsType
 }
 
 // UnmarshalXML implements xml.Unmarshaler.UnmarshalXML.
@@ -407,7 +407,7 @@ func (w *WptType) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	if err := maybeEmitFloatElement(e, "pdop", w.PDOP); err != nil {
 		return err
 	}
-	if err := maybeEmitFloatElement(e, "ageofgpsdata", w.AgeOfGPSData); err != nil {
+	if err := maybeEmitFloatElement(e, "ageofdgpsdata", w.AgeOfDGPSData); err != nil {
 		return err
 	}
 	for _, dgpsid := range w.DGPSID {
@@ -426,56 +426,56 @@ func (w *WptType) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 // UnmarshalXML implements xml.Unmarshaler.UnmarshalXML.
 func (w *WptType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var e struct {
-		Lat          float64         `xml:"lat,attr"`
-		Lon          float64         `xml:"lon,attr"`
-		Ele          float64         `xml:"ele"`
-		Speed        float64         `xml:"speed"`
-		Course       float64         `xml:"course"`
-		Time         string          `xml:"time"`
-		MagVar       float64         `xml:"magvar"`
-		GeoidHeight  float64         `xml:"geoidheight"`
-		Name         string          `xml:"name"`
-		Cmt          string          `xml:"cmt"`
-		Desc         string          `xml:"desc"`
-		Src          string          `xml:"src"`
-		Link         []*LinkType     `xml:"link"`
-		Sym          string          `xml:"sym"`
-		Type         string          `xml:"type"`
-		Fix          string          `xml:"fix"`
-		Sat          int             `xml:"sat"`
-		HDOP         float64         `xml:"hdop"`
-		VDOP         float64         `xml:"vdop"`
-		PDOP         float64         `xml:"pdop"`
-		AgeOfGPSData float64         `xml:"ageofgpsdata"`
-		DGPSID       []int           `xml:"dgpsid"`
-		Extensions   *ExtensionsType `xml:"extensions"`
+		Lat           float64         `xml:"lat,attr"`
+		Lon           float64         `xml:"lon,attr"`
+		Ele           float64         `xml:"ele"`
+		Speed         float64         `xml:"speed"`
+		Course        float64         `xml:"course"`
+		Time          string          `xml:"time"`
+		MagVar        float64         `xml:"magvar"`
+		GeoidHeight   float64         `xml:"geoidheight"`
+		Name          string          `xml:"name"`
+		Cmt           string          `xml:"cmt"`
+		Desc          string          `xml:"desc"`
+		Src           string          `xml:"src"`
+		Link          []*LinkType     `xml:"link"`
+		Sym           string          `xml:"sym"`
+		Type          string          `xml:"type"`
+		Fix           string          `xml:"fix"`
+		Sat           int             `xml:"sat"`
+		HDOP          float64         `xml:"hdop"`
+		VDOP          float64         `xml:"vdop"`
+		PDOP          float64         `xml:"pdop"`
+		AgeOfDGPSData float64         `xml:"ageofdgpsdata"`
+		DGPSID        []int           `xml:"dgpsid"`
+		Extensions    *ExtensionsType `xml:"extensions"`
 	}
 	if err := d.DecodeElement(&e, &start); err != nil {
 		return err
 	}
 	wt := WptType{
-		Lat:          e.Lat,
-		Lon:          e.Lon,
-		Ele:          e.Ele,
-		Speed:        e.Speed,
-		Course:       e.Course,
-		MagVar:       e.MagVar,
-		GeoidHeight:  e.GeoidHeight,
-		Name:         e.Name,
-		Cmt:          e.Cmt,
-		Desc:         e.Desc,
-		Src:          e.Src,
-		Link:         e.Link,
-		Sym:          e.Sym,
-		Type:         e.Type,
-		Fix:          e.Fix,
-		Sat:          e.Sat,
-		HDOP:         e.HDOP,
-		VDOP:         e.VDOP,
-		PDOP:         e.PDOP,
-		AgeOfGPSData: e.AgeOfGPSData,
-		DGPSID:       e.DGPSID,
-		Extensions:   e.Extensions,
+		Lat:           e.Lat,
+		Lon:           e.Lon,
+		Ele:           e.Ele,
+		Speed:         e.Speed,
+		Course:        e.Course,
+		MagVar:        e.MagVar,
+		GeoidHeight:   e.GeoidHeight,
+		Name:          e.Name,
+		Cmt:           e.Cmt,
+		Desc:          e.Desc,
+		Src:           e.Src,
+		Link:          e.Link,
+		Sym:           e.Sym,
+		Type:          e.Type,
+		Fix:           e.Fix,
+		Sat:           e.Sat,
+		HDOP:          e.HDOP,
+		VDOP:          e.VDOP,
+		PDOP:          e.PDOP,
+		AgeOfDGPSData: e.AgeOfDGPSData,
+		DGPSID:        e.DGPSID,
+		Extensions:    e.Extensions,
 	}
 	if e.Time != "" {
 		t, err := time.ParseInLocation(timeLayout, e.Time, time.UTC)
