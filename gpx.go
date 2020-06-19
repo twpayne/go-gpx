@@ -173,6 +173,7 @@ func (c *CopyrightType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) err
 		}
 	}
 
+	//nolint:goerr113
 	return fmt.Errorf("couldn't parse Copyright year: %s", alias.Year)
 }
 
@@ -521,7 +522,7 @@ func mToTime(m float64) time.Time {
 }
 
 func maybeEmitFloatElement(e *xml.Encoder, localName string, value float64) error {
-	if value == 0.0 {
+	if value == 0 {
 		return nil
 	}
 	return emitStringElement(e, localName, strconv.FormatFloat(value, 'f', -1, 64))

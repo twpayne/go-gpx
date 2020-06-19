@@ -604,6 +604,7 @@ func TestParseExamples(t *testing.T) {
 		"testdata/mystic_basin_trail.gpx",
 	} {
 		t.Run(filename, func(t *testing.T) {
+			//nolint:scopelint
 			f, err := os.Open(filename)
 			assert.NoError(t, err)
 			defer f.Close()
