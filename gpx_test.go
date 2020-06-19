@@ -99,7 +99,7 @@ func TestWpt(t *testing.T) {
 				"\t<hdop>4.4</hdop>\n" +
 				"\t<vdop>5.5</vdop>\n" +
 				"\t<pdop>6.6</pdop>\n" +
-				"\t<ageofgpsdata>7.7</ageofgpsdata>\n" +
+				"\t<ageofdgpsdata>7.7</ageofdgpsdata>\n" +
 				"\t<dgpsid>8</dgpsid>\n" +
 				"</wpt>",
 			wpt: &WptType{
@@ -120,15 +120,15 @@ func TestWpt(t *testing.T) {
 						Type: "Type",
 					},
 				},
-				Sym:          "Crossing",
-				Type:         "Crossing",
-				Fix:          "3d",
-				Sat:          3,
-				HDOP:         4.4,
-				VDOP:         5.5,
-				PDOP:         6.6,
-				AgeOfGPSData: 7.7,
-				DGPSID:       []int{8},
+				Sym:           "Crossing",
+				Type:          "Crossing",
+				Fix:           "3d",
+				Sat:           3,
+				HDOP:          4.4,
+				VDOP:          5.5,
+				PDOP:          6.6,
+				AgeOfDGPSData: 7.7,
+				DGPSID:        []int{8},
 			},
 			layout:    geom.XYZM,
 			g:         geom.NewPoint(geom.XYZM).MustSetCoords([]float64{-71.119277, 42.438878, 44.586548, 1006981528}),
