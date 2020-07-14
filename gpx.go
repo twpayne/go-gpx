@@ -491,6 +491,8 @@ func (w *WptType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 
 func (w *WptType) appendFlatCoords(flatCoords []float64, layout geom.Layout) []float64 {
 	switch layout {
+	case geom.NoLayout:
+		return flatCoords
 	case geom.XY:
 		return append(flatCoords, w.Lon, w.Lat)
 	case geom.XYZ:
