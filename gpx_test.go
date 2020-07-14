@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/xml"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -13,7 +14,7 @@ import (
 )
 
 func TestWpt(t *testing.T) {
-	for _, tc := range []struct {
+	for i, tc := range []struct {
 		data          string
 		wpt           *WptType
 		layout        geom.Layout
@@ -135,27 +136,29 @@ func TestWpt(t *testing.T) {
 			noTestNew: true,
 		},
 	} {
-		var gotWpt WptType
-		assert.NoError(t, xml.Unmarshal([]byte(tc.data), &gotWpt))
-		assert.Equal(t, tc.wpt, &gotWpt)
-		if tc.layout != geom.NoLayout {
-			assert.Equal(t, tc.g, tc.wpt.Geom(tc.layout))
-		}
-		if !tc.noTestMarshal {
-			sb := &strings.Builder{}
-			e := xml.NewEncoder(sb)
-			e.Indent("", "\t")
-			assert.NoError(t, e.EncodeElement(tc.wpt, xml.StartElement{Name: xml.Name{Local: "wpt"}}))
-			assert.Equal(t, strings.Split(tc.data, "\n"), strings.Split(sb.String(), "\n"))
-		}
-		if !tc.noTestNew {
-			assert.Equal(t, tc.wpt, NewWptType(tc.g))
-		}
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			var gotWpt WptType
+			assert.NoError(t, xml.Unmarshal([]byte(tc.data), &gotWpt))
+			assert.Equal(t, tc.wpt, &gotWpt)
+			if tc.layout != geom.NoLayout {
+				assert.Equal(t, tc.g, tc.wpt.Geom(tc.layout))
+			}
+			if !tc.noTestMarshal {
+				sb := &strings.Builder{}
+				e := xml.NewEncoder(sb)
+				e.Indent("", "\t")
+				assert.NoError(t, e.EncodeElement(tc.wpt, xml.StartElement{Name: xml.Name{Local: "wpt"}}))
+				assert.Equal(t, strings.Split(tc.data, "\n"), strings.Split(sb.String(), "\n"))
+			}
+			if !tc.noTestNew {
+				assert.Equal(t, tc.wpt, NewWptType(tc.g))
+			}
+		})
 	}
 }
 
 func TestRte(t *testing.T) {
-	for _, tc := range []struct {
+	for i, tc := range []struct {
 		data          string
 		rte           *RteType
 		layout        geom.Layout
@@ -346,27 +349,29 @@ func TestRte(t *testing.T) {
 			noTestNew: true,
 		},
 	} {
-		var gotRte RteType
-		assert.NoError(t, xml.Unmarshal([]byte(tc.data), &gotRte))
-		assert.Equal(t, tc.rte, &gotRte)
-		if tc.layout != geom.NoLayout {
-			assert.Equal(t, tc.g, tc.rte.Geom(tc.layout))
-		}
-		if !tc.noTestMarshal {
-			sb := &strings.Builder{}
-			e := xml.NewEncoder(sb)
-			e.Indent("", "\t")
-			assert.NoError(t, e.EncodeElement(tc.rte, xml.StartElement{Name: xml.Name{Local: "rte"}}))
-			assert.Equal(t, strings.Split(tc.data, "\n"), strings.Split(sb.String(), "\n"))
-		}
-		if !tc.noTestNew {
-			assert.Equal(t, tc.rte, NewRteType(tc.g))
-		}
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			var gotRte RteType
+			assert.NoError(t, xml.Unmarshal([]byte(tc.data), &gotRte))
+			assert.Equal(t, tc.rte, &gotRte)
+			if tc.layout != geom.NoLayout {
+				assert.Equal(t, tc.g, tc.rte.Geom(tc.layout))
+			}
+			if !tc.noTestMarshal {
+				sb := &strings.Builder{}
+				e := xml.NewEncoder(sb)
+				e.Indent("", "\t")
+				assert.NoError(t, e.EncodeElement(tc.rte, xml.StartElement{Name: xml.Name{Local: "rte"}}))
+				assert.Equal(t, strings.Split(tc.data, "\n"), strings.Split(sb.String(), "\n"))
+			}
+			if !tc.noTestNew {
+				assert.Equal(t, tc.rte, NewRteType(tc.g))
+			}
+		})
 	}
 }
 
 func TestTrk(t *testing.T) {
-	for _, tc := range []struct {
+	for i, tc := range []struct {
 		data          string
 		trk           *TrkType
 		layout        geom.Layout
@@ -429,27 +434,29 @@ func TestTrk(t *testing.T) {
 			),
 		},
 	} {
-		var gotTrk TrkType
-		assert.NoError(t, xml.Unmarshal([]byte(tc.data), &gotTrk))
-		assert.Equal(t, tc.trk, &gotTrk)
-		if tc.layout != geom.NoLayout {
-			assert.Equal(t, tc.g, tc.trk.Geom(tc.layout))
-		}
-		if !tc.noTestMarshal {
-			sb := &strings.Builder{}
-			e := xml.NewEncoder(sb)
-			e.Indent("", "\t")
-			assert.NoError(t, e.EncodeElement(tc.trk, xml.StartElement{Name: xml.Name{Local: "trk"}}))
-			assert.Equal(t, strings.Split(tc.data, "\n"), strings.Split(sb.String(), "\n"))
-		}
-		if !tc.noTestNew {
-			assert.Equal(t, tc.trk, NewTrkType(tc.g))
-		}
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			var gotTrk TrkType
+			assert.NoError(t, xml.Unmarshal([]byte(tc.data), &gotTrk))
+			assert.Equal(t, tc.trk, &gotTrk)
+			if tc.layout != geom.NoLayout {
+				assert.Equal(t, tc.g, tc.trk.Geom(tc.layout))
+			}
+			if !tc.noTestMarshal {
+				sb := &strings.Builder{}
+				e := xml.NewEncoder(sb)
+				e.Indent("", "\t")
+				assert.NoError(t, e.EncodeElement(tc.trk, xml.StartElement{Name: xml.Name{Local: "trk"}}))
+				assert.Equal(t, strings.Split(tc.data, "\n"), strings.Split(sb.String(), "\n"))
+			}
+			if !tc.noTestNew {
+				assert.Equal(t, tc.trk, NewTrkType(tc.g))
+			}
+		})
 	}
 }
 
 func TestRoundTrip(t *testing.T) {
-	for _, tc := range []struct {
+	for i, tc := range []struct {
 		data string
 		gpx  *GPX
 	}{
@@ -565,17 +572,19 @@ func TestRoundTrip(t *testing.T) {
 			},
 		},
 	} {
-		got, err := Read(bytes.NewBufferString(tc.data))
-		assert.NoError(t, err)
-		assert.Equal(t, tc.gpx, got)
-		sb := &strings.Builder{}
-		assert.NoError(t, tc.gpx.WriteIndent(sb, "", "\t"))
-		assert.Equal(t, strings.Split(tc.data, "\n"), strings.Split(sb.String(), "\n"))
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			got, err := Read(bytes.NewBufferString(tc.data))
+			assert.NoError(t, err)
+			assert.Equal(t, tc.gpx, got)
+			sb := &strings.Builder{}
+			assert.NoError(t, tc.gpx.WriteIndent(sb, "", "\t"))
+			assert.Equal(t, strings.Split(tc.data, "\n"), strings.Split(sb.String(), "\n"))
+		})
 	}
 }
 
 func TestTime(t *testing.T) {
-	for _, tc := range []struct {
+	for i, tc := range []struct {
 		t time.Time
 		m float64
 	}{
@@ -592,8 +601,10 @@ func TestTime(t *testing.T) {
 			m: 1136214245.5,
 		},
 	} {
-		assert.Equal(t, tc.m, timeToM(tc.t))
-		assert.Equal(t, tc.t, mToTime(tc.m))
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			assert.Equal(t, tc.m, timeToM(tc.t))
+			assert.Equal(t, tc.t, mToTime(tc.m))
+		})
 	}
 }
 
@@ -615,7 +626,7 @@ func TestParseExamples(t *testing.T) {
 }
 
 func TestCoprightTypeYear(t *testing.T) {
-	for _, tc := range []struct {
+	for i, tc := range []struct {
 		data []byte
 		year int
 	}{
@@ -636,8 +647,10 @@ func TestCoprightTypeYear(t *testing.T) {
 			year: 2010,
 		},
 	} {
-		var gotCopyright CopyrightType
-		assert.NoError(t, xml.Unmarshal(tc.data, &gotCopyright))
-		assert.Equal(t, tc.year, gotCopyright.Year)
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			var gotCopyright CopyrightType
+			assert.NoError(t, xml.Unmarshal(tc.data, &gotCopyright))
+			assert.Equal(t, tc.year, gotCopyright.Year)
+		})
 	}
 }
