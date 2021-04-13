@@ -15,7 +15,7 @@ import (
 	"golang.org/x/net/html/charset"
 )
 
-const timeLayout = "2006-01-02T15:04:05.999999999Z"
+const timeLayout = time.RFC3339Nano
 
 // StartElement is the XML start element for GPX files.
 var StartElement = xml.StartElement{
