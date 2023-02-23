@@ -78,9 +78,13 @@ linters:
   - whitespace
   disable:
   - cyclop
-  - exhaustruct
+  - dupl
   - exhaustivestruct
+  - exhaustruct
   - funlen
+  - gochecknoglobals
+  - gomnd
+  - lll
   - nlreturn
   - paralleltest
   - rowserrcheck # https://github.com/golangci/golangci-lint/issues/2649
@@ -90,10 +94,6 @@ linters:
   - wastedassign # https://github.com/golangci/golangci-lint/issues/2649
   - wrapcheck
   - wsl
-  - gochecknoglobals
-  - gomnd
-  - dupl
-  - lll
 
 linters-settings:
   gci:
