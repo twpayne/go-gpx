@@ -626,7 +626,7 @@ func TestParseExamples(t *testing.T) {
 	}
 }
 
-func TestCoprightTypeYear(t *testing.T) {
+func TestCopyrightTypeYear(t *testing.T) {
 	for i, tc := range []struct {
 		data []byte
 		year int
