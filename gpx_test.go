@@ -1,4 +1,4 @@
-package gpx
+package gpx_test
 
 import (
 	"bytes"
@@ -11,12 +11,14 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	geom "github.com/twpayne/go-geom"
+
+	gpx "github.com/twpayne/go-gpx"
 )
 
 func TestWpt(t *testing.T) {
 	for i, tc := range []struct {
 		data          string
-		wpt           *WptType
+		wpt           *gpx.WptType
 		layout        geom.Layout
 		g             *geom.Point
 		noTestMarshal bool
@@ -24,7 +26,7 @@ func TestWpt(t *testing.T) {
 	}{
 		{
 			data: "<wpt lat=\"42.438878\" lon=\"-71.119277\"></wpt>",
-			wpt: &WptType{
+			wpt: &gpx.WptType{
 				Lat: 42.438878,
 				Lon: -71.119277,
 			},
@@ -35,7 +37,7 @@ func TestWpt(t *testing.T) {
 			data: "<wpt lat=\"42.438878\" lon=\"-71.119277\">\n" +
 				"\t<ele>44.586548</ele>\n" +
 				"</wpt>",
-			wpt: &WptType{
+			wpt: &gpx.WptType{
 				Lat: 42.438878,
 				Lon: -71.119277,
 				Ele: 44.586548,
@@ -47,7 +49,7 @@ func TestWpt(t *testing.T) {
 			data: "<wpt lat=\"42.438878\" lon=\"-71.119277\">\n" +
 				"\t<time>2001-11-28T21:05:28Z</time>\n" +
 				"</wpt>",
-			wpt: &WptType{
+			wpt: &gpx.WptType{
 				Lat:  42.438878,
 				Lon:  -71.119277,
 				Time: time.Date(2001, 11, 28, 21, 5, 28, 0, time.UTC),
@@ -64,7 +66,7 @@ func TestWpt(t *testing.T) {
 				"\t<sym>Crossing</sym>\n" +
 				"\t<type><![CDATA[Crossing]]></type>\n" +
 				"</wpt>\n",
-			wpt: &WptType{
+			wpt: &gpx.WptType{
 				Lat:  42.438878,
 				Lon:  -71.119277,
 				Ele:  44.586548,
@@ -103,7 +105,7 @@ func TestWpt(t *testing.T) {
 				"\t<ageofdgpsdata>7.7</ageofdgpsdata>\n" +
 				"\t<dgpsid>8</dgpsid>\n" +
 				"</wpt>",
-			wpt: &WptType{
+			wpt: &gpx.WptType{
 				Lat:         42.438878,
 				Lon:         -71.119277,
 				Ele:         44.586548,
@@ -114,7 +116,7 @@ func TestWpt(t *testing.T) {
 				Cmt:         "Comment",
 				Desc:        "5066",
 				Src:         "Source",
-				Link: []*LinkType{
+				Link: []*gpx.LinkType{
 					{
 						HREF: "http://example.com",
 						Text: "Text",
@@ -137,7 +139,7 @@ func TestWpt(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			var gotWpt WptType
+			var gotWpt gpx.WptType
 			assert.NoError(t, xml.Unmarshal([]byte(tc.data), &gotWpt))
 			assert.Equal(t, tc.wpt, &gotWpt)
 			if tc.layout != geom.NoLayout {
@@ -151,7 +153,7 @@ func TestWpt(t *testing.T) {
 				assert.Equal(t, strings.Split(tc.data, "\n"), strings.Split(sb.String(), "\n"))
 			}
 			if !tc.noTestNew {
-				assert.Equal(t, tc.wpt, NewWptType(tc.g))
+				assert.Equal(t, tc.wpt, gpx.NewWptType(tc.g))
 			}
 		})
 	}
@@ -160,7 +162,7 @@ func TestWpt(t *testing.T) {
 func TestRte(t *testing.T) {
 	for i, tc := range []struct {
 		data          string
-		rte           *RteType
+		rte           *gpx.RteType
 		layout        geom.Layout
 		g             *geom.LineString
 		noTestMarshal bool
@@ -171,8 +173,8 @@ func TestRte(t *testing.T) {
 				"\t<rtept lat=\"42.43095\" lon=\"-71.107628\"></rtept>\n" +
 				"\t<rtept lat=\"42.43124\" lon=\"-71.109236\"></rtept>\n" +
 				"</rte>",
-			rte: &RteType{
-				RtePt: []*WptType{
+			rte: &gpx.RteType{
+				RtePt: []*gpx.WptType{
 					{
 						Lat: 42.43095,
 						Lon: -71.107628,
@@ -200,8 +202,8 @@ func TestRte(t *testing.T) {
 				"\t\t<ele>26.56189</ele>\n" +
 				"\t</rtept>\n" +
 				"</rte>",
-			rte: &RteType{
-				RtePt: []*WptType{
+			rte: &gpx.RteType{
+				RtePt: []*gpx.WptType{
 					{
 						Lat: 42.43095,
 						Lon: -71.107628,
@@ -231,8 +233,8 @@ func TestRte(t *testing.T) {
 				"\t\t<time>2001-11-07T23:53:41Z</time>\n" +
 				"\t</rtept>\n" +
 				"</rte>",
-			rte: &RteType{
-				RtePt: []*WptType{
+			rte: &gpx.RteType{
+				RtePt: []*gpx.WptType{
 					{
 						Lat:  42.43095,
 						Lon:  -71.107628,
@@ -264,8 +266,8 @@ func TestRte(t *testing.T) {
 				"\t\t<time>2001-11-07T23:53:41Z</time>\n" +
 				"\t</rtept>\n" +
 				"</rte>",
-			rte: &RteType{
-				RtePt: []*WptType{
+			rte: &gpx.RteType{
+				RtePt: []*gpx.WptType{
 					{
 						Lat:  42.43095,
 						Lon:  -71.107628,
@@ -311,11 +313,11 @@ func TestRte(t *testing.T) {
 				"\t\t<type>Trail Head</type>\n" +
 				"\t</rtept>\n" +
 				"</rte>",
-			rte: &RteType{
+			rte: &gpx.RteType{
 				Name:   "BELLEVUE",
 				Desc:   "Bike Loop Bellevue",
 				Number: 1,
-				RtePt: []*WptType{
+				RtePt: []*gpx.WptType{
 					{
 						Lat:  42.43095,
 						Lon:  -71.107628,
@@ -350,7 +352,7 @@ func TestRte(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			var gotRte RteType
+			var gotRte gpx.RteType
 			assert.NoError(t, xml.Unmarshal([]byte(tc.data), &gotRte))
 			assert.Equal(t, tc.rte, &gotRte)
 			if tc.layout != geom.NoLayout {
@@ -364,7 +366,7 @@ func TestRte(t *testing.T) {
 				assert.Equal(t, strings.Split(tc.data, "\n"), strings.Split(sb.String(), "\n"))
 			}
 			if !tc.noTestNew {
-				assert.Equal(t, tc.rte, NewRteType(tc.g))
+				assert.Equal(t, tc.rte, gpx.NewRteType(tc.g))
 			}
 		})
 	}
@@ -373,7 +375,7 @@ func TestRte(t *testing.T) {
 func TestTrk(t *testing.T) {
 	for i, tc := range []struct {
 		data          string
-		trk           *TrkType
+		trk           *gpx.TrkType
 		layout        geom.Layout
 		g             *geom.MultiLineString
 		noTestMarshal bool
@@ -396,10 +398,10 @@ func TestTrk(t *testing.T) {
 				"\t\t</trkpt>\n" +
 				"\t</trkseg>\n" +
 				"</trk>",
-			trk: &TrkType{
-				TrkSeg: []*TrkSegType{
+			trk: &gpx.TrkType{
+				TrkSeg: []*gpx.TrkSegType{
 					{
-						TrkPt: []*WptType{
+						TrkPt: []*gpx.WptType{
 							{
 								Lat:  47.644548,
 								Lon:  -122.326897,
@@ -435,7 +437,7 @@ func TestTrk(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			var gotTrk TrkType
+			var gotTrk gpx.TrkType
 			assert.NoError(t, xml.Unmarshal([]byte(tc.data), &gotTrk))
 			assert.Equal(t, tc.trk, &gotTrk)
 			if tc.layout != geom.NoLayout {
@@ -449,7 +451,7 @@ func TestTrk(t *testing.T) {
 				assert.Equal(t, strings.Split(tc.data, "\n"), strings.Split(sb.String(), "\n"))
 			}
 			if !tc.noTestNew {
-				assert.Equal(t, tc.trk, NewTrkType(tc.g))
+				assert.Equal(t, tc.trk, gpx.NewTrkType(tc.g))
 			}
 		})
 	}
@@ -458,7 +460,7 @@ func TestTrk(t *testing.T) {
 func TestRoundTrip(t *testing.T) {
 	for i, tc := range []struct {
 		data string
-		gpx  *GPX
+		gpx  *gpx.GPX
 	}{
 		{
 			data: "<gpx" +
@@ -468,7 +470,7 @@ func TestRoundTrip(t *testing.T) {
 				" xmlns=\"http://www.topografix.com/GPX/1/0\"" +
 				" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd\">" +
 				"</gpx>",
-			gpx: &GPX{
+			gpx: &gpx.GPX{
 				Version: "1.0",
 				Creator: "ExpertGPS 1.1 - http://www.topografix.com",
 			},
@@ -489,10 +491,10 @@ func TestRoundTrip(t *testing.T) {
 				"\t\t<type>Crossing</type>\n" +
 				"\t</wpt>\n" +
 				"</gpx>",
-			gpx: &GPX{
+			gpx: &gpx.GPX{
 				Version: "1.0",
 				Creator: "ExpertGPS 1.1 - http://www.topografix.com",
-				Wpt: []*WptType{
+				Wpt: []*gpx.WptType{
 					{
 						Lat:  42.438878,
 						Lon:  -71.119277,
@@ -536,15 +538,15 @@ func TestRoundTrip(t *testing.T) {
 				"\t\t</rtept>\n" +
 				"\t</rte>\n" +
 				"</gpx>",
-			gpx: &GPX{
+			gpx: &gpx.GPX{
 				Version: "1.0",
 				Creator: "ExpertGPS 1.1 - http://www.topografix.com",
-				Rte: []*RteType{
+				Rte: []*gpx.RteType{
 					{
 						Name:   "BELLEVUE",
 						Desc:   "Bike Loop Bellevue",
 						Number: 1,
-						RtePt: []*WptType{
+						RtePt: []*gpx.WptType{
 							{
 								Lat:  42.43095,
 								Lon:  -71.107628,
@@ -573,7 +575,7 @@ func TestRoundTrip(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got, err := Read(bytes.NewBufferString(tc.data))
+			got, err := gpx.Read(bytes.NewBufferString(tc.data))
 			assert.NoError(t, err)
 			assert.Equal(t, tc.gpx, got)
 			sb := &strings.Builder{}
@@ -602,8 +604,8 @@ func TestTime(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			assert.Equal(t, tc.m, timeToM(tc.t))
-			assert.Equal(t, tc.t, mToTime(tc.m))
+			assert.Equal(t, tc.m, gpx.TimeToM(tc.t))
+			assert.Equal(t, tc.t, gpx.MToTime(tc.m))
 		})
 	}
 }
@@ -618,7 +620,7 @@ func TestParseExamples(t *testing.T) {
 			f, err := os.Open(filename)
 			assert.NoError(t, err)
 			defer f.Close()
-			_, err = Read(f)
+			_, err = gpx.Read(f)
 			assert.NoError(t, err)
 		})
 	}
@@ -647,7 +649,7 @@ func TestCoprightTypeYear(t *testing.T) {
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			var gotCopyright CopyrightType
+			var gotCopyright gpx.CopyrightType
 			assert.NoError(t, xml.Unmarshal(tc.data, &gotCopyright))
 			assert.Equal(t, tc.year, gotCopyright.Year)
 		})
