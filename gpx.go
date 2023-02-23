@@ -123,29 +123,29 @@ type TrkType struct {
 
 // A WptType is a wptType.
 type WptType struct {
-	Lat           float64
-	Lon           float64
-	Ele           float64
-	Speed         float64
-	Course        float64
-	Time          time.Time
-	MagVar        float64
-	GeoidHeight   float64
-	Name          string
-	Cmt           string
-	Desc          string
-	Src           string
-	Link          []*LinkType
-	Sym           string
-	Type          string
-	Fix           string
-	Sat           int
-	HDOP          float64
-	VDOP          float64
-	PDOP          float64
-	AgeOfDGPSData float64
-	DGPSID        []int
-	Extensions    *ExtensionsType
+	Lat           float64         `xml:"lat,omitempty"`
+	Lon           float64         `xml:"lon,omitempty"`
+	Ele           float64         `xml:"ele,omitempty"`
+	Speed         float64         `xml:"speed,omitempty"`
+	Course        float64         `xml:"course,omitempty"`
+	Time          time.Time       `xml:"time,omitempty"`
+	MagVar        float64         `xml:"magvar,omitempty"`
+	GeoidHeight   float64         `xml:"geoidheight,omitempty"`
+	Name          string          `xml:"name,omitempty"`
+	Cmt           string          `xml:"cmt,omitempty"`
+	Desc          string          `xml:"desc,omitempty"`
+	Src           string          `xml:"src,omitempty"`
+	Link          []*LinkType     `xml:"link,omitempty"`
+	Sym           string          `xml:"sym,omitempty"`
+	Type          string          `xml:"type,omitempty"`
+	Fix           string          `xml:"fix,omitempty"`
+	Sat           int             `xml:"sat,omitempty"`
+	HDOP          float64         `xml:"hdop,omitempty"`
+	VDOP          float64         `xml:"vdop,omitempty"`
+	PDOP          float64         `xml:"pdop,omitempty"`
+	AgeOfDGPSData float64         `xml:"ageofdgpsdata,omitempty"`
+	DGPSID        []int           `xml:"dgpsid,omitempty"`
+	Extensions    *ExtensionsType `xml:"extensions,omitempty"`
 }
 
 // UnmarshalXML implements xml.Unmarshaler.UnmarshalXML.
