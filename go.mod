@@ -1,5 +1,7 @@
 module github.com/twpayne/go-gpx
 
+go 1.19
+
 require (
 	github.com/kr/pretty v0.3.1
 	github.com/stretchr/testify v1.8.1
@@ -15,5 +17,3 @@ require (
 	golang.org/x/text v0.7.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-go 1.19
