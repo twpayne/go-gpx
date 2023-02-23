@@ -50,16 +50,16 @@ type ExtensionsType struct {
 
 // A GPX is a gpxType.
 type GPX struct {
-	XMLName           string            `xml:"gpx"`
-	XMLSchemaLoctions []string          `xml:"xsi:schemaLocation,attr"`
-	XMLAttrs          map[string]string `xml:"-"`
-	Version           string            `xml:"version,attr"`
-	Creator           string            `xml:"creator,attr"`
-	Metadata          *MetadataType     `xml:"metadata,omitempty"`
-	Wpt               []*WptType        `xml:"wpt,omitempty"`
-	Rte               []*RteType        `xml:"rte,omitempty"`
-	Trk               []*TrkType        `xml:"trk,omitempty"`
-	Extensions        *ExtensionsType   `xml:"extensions"`
+	XMLName            string            `xml:"gpx"`
+	XMLSchemaLocations []string          `xml:"xsi:schemaLocation,attr"`
+	XMLAttrs           map[string]string `xml:"-"`
+	Version            string            `xml:"version,attr"`
+	Creator            string            `xml:"creator,attr"`
+	Metadata           *MetadataType     `xml:"metadata,omitempty"`
+	Wpt                []*WptType        `xml:"wpt,omitempty"`
+	Rte                []*RteType        `xml:"rte,omitempty"`
+	Trk                []*TrkType        `xml:"trk,omitempty"`
+	Extensions         *ExtensionsType   `xml:"extensions"`
 }
 
 // A LinkType is a linkType.
@@ -123,29 +123,29 @@ type TrkType struct {
 
 // A WptType is a wptType.
 type WptType struct {
-	Lat           float64
-	Lon           float64
-	Ele           float64
-	Speed         float64
-	Course        float64
-	Time          time.Time
-	MagVar        float64
-	GeoidHeight   float64
-	Name          string
-	Cmt           string
-	Desc          string
-	Src           string
-	Link          []*LinkType
-	Sym           string
-	Type          string
-	Fix           string
-	Sat           int
-	HDOP          float64
-	VDOP          float64
-	PDOP          float64
-	AgeOfDGPSData float64
-	DGPSID        []int
-	Extensions    *ExtensionsType
+	Lat           float64         `xml:"lat,omitempty"`
+	Lon           float64         `xml:"lon,omitempty"`
+	Ele           float64         `xml:"ele,omitempty"`
+	Speed         float64         `xml:"speed,omitempty"`
+	Course        float64         `xml:"course,omitempty"`
+	Time          time.Time       `xml:"time,omitempty"`
+	MagVar        float64         `xml:"magvar,omitempty"`
+	GeoidHeight   float64         `xml:"geoidheight,omitempty"`
+	Name          string          `xml:"name,omitempty"`
+	Cmt           string          `xml:"cmt,omitempty"`
+	Desc          string          `xml:"desc,omitempty"`
+	Src           string          `xml:"src,omitempty"`
+	Link          []*LinkType     `xml:"link,omitempty"`
+	Sym           string          `xml:"sym,omitempty"`
+	Type          string          `xml:"type,omitempty"`
+	Fix           string          `xml:"fix,omitempty"`
+	Sat           int             `xml:"sat,omitempty"`
+	HDOP          float64         `xml:"hdop,omitempty"`
+	VDOP          float64         `xml:"vdop,omitempty"`
+	PDOP          float64         `xml:"pdop,omitempty"`
+	AgeOfDGPSData float64         `xml:"ageofdgpsdata,omitempty"`
+	DGPSID        []int           `xml:"dgpsid,omitempty"`
+	Extensions    *ExtensionsType `xml:"extensions,omitempty"`
 }
 
 // UnmarshalXML implements xml.Unmarshaler.UnmarshalXML.
@@ -173,7 +173,6 @@ func (c *CopyrightType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) err
 		}
 	}
 
-	//nolint:goerr113
 	return fmt.Errorf("couldn't parse Copyright year: %s", alias.Year)
 }
 
@@ -186,12 +185,12 @@ func Read(r io.Reader) (*GPX, error) {
 }
 
 // MarshalXML implements xml.Marshaler.MarshalXML.
-func (g *GPX) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+func (g *GPX) MarshalXML(e *xml.Encoder, _ xml.StartElement) error {
 	baseURL := "http://www.topografix.com/GPX/" + strings.Join(strings.Split(g.Version, "."), "/")
 	xmlSchemaLocations := append([]string{
 		baseURL,
 		baseURL + "/gpx.xsd",
-	}, g.XMLSchemaLoctions...)
+	}, g.XMLSchemaLocations...)
 	attr := []xml.Attr{
 		{
 			Name:  xml.Name{Local: "version"},
@@ -220,7 +219,7 @@ func (g *GPX) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 			Value: v,
 		})
 	}
-	start = xml.StartElement{
+	start := xml.StartElement{
 		Name: xml.Name{Local: "gpx"},
 		Attr: attr,
 	}
@@ -326,7 +325,7 @@ func NewWptType(g *geom.Point) *WptType {
 		w.Ele = flatCoords[zIndex]
 	}
 	if mIndex := layout.MIndex(); mIndex != -1 {
-		w.Time = mToTime(flatCoords[mIndex])
+		w.Time = MToTime(flatCoords[mIndex])
 	}
 	return w
 }
@@ -498,14 +497,28 @@ func (w *WptType) appendFlatCoords(flatCoords []float64, layout geom.Layout) []f
 	case geom.XYZ:
 		return append(flatCoords, w.Lon, w.Lat, w.Ele)
 	case geom.XYM:
-		return append(flatCoords, w.Lon, w.Lat, timeToM(w.Time))
+		return append(flatCoords, w.Lon, w.Lat, TimeToM(w.Time))
 	case geom.XYZM:
-		return append(flatCoords, w.Lon, w.Lat, w.Ele, timeToM(w.Time))
+		return append(flatCoords, w.Lon, w.Lat, w.Ele, TimeToM(w.Time))
 	default:
-		flatCoords = append(flatCoords, w.Lon, w.Lat, w.Ele, timeToM(w.Time))
+		flatCoords = append(flatCoords, w.Lon, w.Lat, w.Ele, TimeToM(w.Time))
 		flatCoords = append(flatCoords, make([]float64, int(layout)-4)...)
 		return flatCoords
 	}
+}
+
+func MToTime(m float64) time.Time {
+	if m == 0 {
+		return time.Unix(0, 0)
+	}
+	return time.Unix(int64(m), int64(m*float64(time.Second))%int64(time.Second)).UTC()
+}
+
+func TimeToM(t time.Time) float64 {
+	if t.IsZero() {
+		return 0
+	}
+	return float64(t.UnixNano()) / float64(time.Second)
 }
 
 func emitIntElement(e *xml.Encoder, localName string, value int) error {
@@ -514,13 +527,6 @@ func emitIntElement(e *xml.Encoder, localName string, value int) error {
 
 func emitStringElement(e *xml.Encoder, localName, value string) error {
 	return e.EncodeElement(value, xml.StartElement{Name: xml.Name{Local: localName}})
-}
-
-func mToTime(m float64) time.Time {
-	if m == 0 {
-		return time.Unix(0, 0)
-	}
-	return time.Unix(int64(m), int64(m*float64(time.Second))%int64(time.Second)).UTC()
 }
 
 func maybeEmitFloatElement(e *xml.Encoder, localName string, value float64) error {
@@ -561,17 +567,10 @@ func newWptTypes(g *geom.LineString) []*WptType {
 			wpt.Ele = flatCoords[start+zIndex]
 		}
 		if mIndex != -1 {
-			wpt.Time = mToTime(flatCoords[start+mIndex])
+			wpt.Time = MToTime(flatCoords[start+mIndex])
 		}
 		start += stride
 		wpts[i] = wpt
 	}
 	return wpts
-}
-
-func timeToM(t time.Time) float64 {
-	if t.IsZero() {
-		return 0
-	}
-	return float64(t.UnixNano()) / float64(time.Second)
 }

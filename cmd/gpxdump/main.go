@@ -6,36 +6,36 @@ import (
 	"log"
 	"os"
 
-	"github.com/davecgh/go-spew/spew"
+	"github.com/kr/pretty"
 
 	"github.com/twpayne/go-gpx"
 )
 
-func dumpFile(w io.Writer, filename string) error {
+func dumpFile(filename string) error {
 	f, err := os.Open(filename)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	return dump(w, f)
+	return dump(f)
 }
 
-func dump(w io.Writer, r io.Reader) error {
+func dump(r io.Reader) error {
 	g, err := gpx.Read(r)
 	if err != nil {
 		return err
 	}
-	spew.Fdump(w, g)
+	pretty.Println(g)
 	return nil
 }
 
 func run() error {
 	flag.Parse()
 	if flag.NArg() == 0 {
-		return dump(os.Stdout, os.Stdin)
+		return dump(os.Stdin)
 	}
 	for _, arg := range flag.Args() {
-		if err := dumpFile(os.Stdout, arg); err != nil {
+		if err := dumpFile(arg); err != nil {
 			return err
 		}
 	}
