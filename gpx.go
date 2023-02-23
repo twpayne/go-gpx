@@ -186,7 +186,7 @@ func Read(r io.Reader) (*GPX, error) {
 }
 
 // MarshalXML implements xml.Marshaler.MarshalXML.
-func (g *GPX) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+func (g *GPX) MarshalXML(e *xml.Encoder, _ xml.StartElement) error {
 	baseURL := "http://www.topografix.com/GPX/" + strings.Join(strings.Split(g.Version, "."), "/")
 	xmlSchemaLocations := append([]string{
 		baseURL,
@@ -220,7 +220,7 @@ func (g *GPX) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 			Value: v,
 		})
 	}
-	start = xml.StartElement{
+	start := xml.StartElement{
 		Name: xml.Name{Local: "gpx"},
 		Attr: attr,
 	}
