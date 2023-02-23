@@ -1,4 +1,4 @@
-name: Test
+name: main
 on:
   pull_request:
   push:
@@ -10,24 +10,21 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - name: Set up Go
-      uses: actions/setup-go@v1
+    - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+    - uses: actions/setup-go@6edd4406fa81c3da01a34fa6f6343087c207a568
       with:
-        go-version: 1.x
-    - name: Cache Go modules
-      uses: actions/cache@v1
-      with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
-    - name: Checkout
-      uses: actions/checkout@v2
-    - name: Build
+        go-version: stable
+    - name: build
       run: go build ./...
-    - name: Test
+    - name: test
       run: go test ./...
-    - name: Lint
-      uses: golangci/golangci-lint-action@v2
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+    - uses: actions/setup-go@6edd4406fa81c3da01a34fa6f6343087c207a568
       with:
-        version: v1.39
+        go-version: stable
+    - uses: golangci/golangci-lint-action@08e2f20817b15149a52b5b3ebe7de50aff2ba8c5
+      with:
+        version: v1.51.2

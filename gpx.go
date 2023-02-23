@@ -173,7 +173,6 @@ func (c *CopyrightType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) err
 		}
 	}
 
-	//nolint:goerr113
 	return fmt.Errorf("couldn't parse Copyright year: %s", alias.Year)
 }
 
