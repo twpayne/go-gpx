@@ -326,7 +326,7 @@ func NewWptType(g *geom.Point) *WptType {
 		w.Ele = flatCoords[zIndex]
 	}
 	if mIndex := layout.MIndex(); mIndex != -1 {
-		w.Time = mToTime(flatCoords[mIndex])
+		w.Time = MToTime(flatCoords[mIndex])
 	}
 	return w
 }
@@ -498,14 +498,28 @@ func (w *WptType) appendFlatCoords(flatCoords []float64, layout geom.Layout) []f
 	case geom.XYZ:
 		return append(flatCoords, w.Lon, w.Lat, w.Ele)
 	case geom.XYM:
-		return append(flatCoords, w.Lon, w.Lat, timeToM(w.Time))
+		return append(flatCoords, w.Lon, w.Lat, TimeToM(w.Time))
 	case geom.XYZM:
-		return append(flatCoords, w.Lon, w.Lat, w.Ele, timeToM(w.Time))
+		return append(flatCoords, w.Lon, w.Lat, w.Ele, TimeToM(w.Time))
 	default:
-		flatCoords = append(flatCoords, w.Lon, w.Lat, w.Ele, timeToM(w.Time))
+		flatCoords = append(flatCoords, w.Lon, w.Lat, w.Ele, TimeToM(w.Time))
 		flatCoords = append(flatCoords, make([]float64, int(layout)-4)...)
 		return flatCoords
 	}
+}
+
+func MToTime(m float64) time.Time {
+	if m == 0 {
+		return time.Unix(0, 0)
+	}
+	return time.Unix(int64(m), int64(m*float64(time.Second))%int64(time.Second)).UTC()
+}
+
+func TimeToM(t time.Time) float64 {
+	if t.IsZero() {
+		return 0
+	}
+	return float64(t.UnixNano()) / float64(time.Second)
 }
 
 func emitIntElement(e *xml.Encoder, localName string, value int) error {
@@ -514,13 +528,6 @@ func emitIntElement(e *xml.Encoder, localName string, value int) error {
 
 func emitStringElement(e *xml.Encoder, localName, value string) error {
 	return e.EncodeElement(value, xml.StartElement{Name: xml.Name{Local: localName}})
-}
-
-func mToTime(m float64) time.Time {
-	if m == 0 {
-		return time.Unix(0, 0)
-	}
-	return time.Unix(int64(m), int64(m*float64(time.Second))%int64(time.Second)).UTC()
 }
 
 func maybeEmitFloatElement(e *xml.Encoder, localName string, value float64) error {
@@ -561,17 +568,10 @@ func newWptTypes(g *geom.LineString) []*WptType {
 			wpt.Ele = flatCoords[start+zIndex]
 		}
 		if mIndex != -1 {
-			wpt.Time = mToTime(flatCoords[start+mIndex])
+			wpt.Time = MToTime(flatCoords[start+mIndex])
 		}
 		start += stride
 		wpts[i] = wpt
 	}
 	return wpts
-}
-
-func timeToM(t time.Time) float64 {
-	if t.IsZero() {
-		return 0
-	}
-	return float64(t.UnixNano()) / float64(time.Second)
 }
