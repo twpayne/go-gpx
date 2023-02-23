@@ -50,16 +50,16 @@ type ExtensionsType struct {
 
 // A GPX is a gpxType.
 type GPX struct {
-	XMLName           string            `xml:"gpx"`
-	XMLSchemaLoctions []string          `xml:"xsi:schemaLocation,attr"`
-	XMLAttrs          map[string]string `xml:"-"`
-	Version           string            `xml:"version,attr"`
-	Creator           string            `xml:"creator,attr"`
-	Metadata          *MetadataType     `xml:"metadata,omitempty"`
-	Wpt               []*WptType        `xml:"wpt,omitempty"`
-	Rte               []*RteType        `xml:"rte,omitempty"`
-	Trk               []*TrkType        `xml:"trk,omitempty"`
-	Extensions        *ExtensionsType   `xml:"extensions"`
+	XMLName            string            `xml:"gpx"`
+	XMLSchemaLocations []string          `xml:"xsi:schemaLocation,attr"`
+	XMLAttrs           map[string]string `xml:"-"`
+	Version            string            `xml:"version,attr"`
+	Creator            string            `xml:"creator,attr"`
+	Metadata           *MetadataType     `xml:"metadata,omitempty"`
+	Wpt                []*WptType        `xml:"wpt,omitempty"`
+	Rte                []*RteType        `xml:"rte,omitempty"`
+	Trk                []*TrkType        `xml:"trk,omitempty"`
+	Extensions         *ExtensionsType   `xml:"extensions"`
 }
 
 // A LinkType is a linkType.
@@ -191,7 +191,7 @@ func (g *GPX) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	xmlSchemaLocations := append([]string{
 		baseURL,
 		baseURL + "/gpx.xsd",
-	}, g.XMLSchemaLoctions...)
+	}, g.XMLSchemaLocations...)
 	attr := []xml.Attr{
 		{
 			Name:  xml.Name{Local: "version"},
