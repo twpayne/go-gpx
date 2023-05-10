@@ -7,6 +7,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -15,7 +16,11 @@ import (
 	"golang.org/x/net/html/charset"
 )
 
-const timeLayout = time.RFC3339Nano
+const (
+	earthRadius = 6371 * 1000
+	oneDegree   = 1000.0 * 10000.8 / 90.0
+	timeLayout  = time.RFC3339Nano
+)
 
 // StartElement is the XML start element for GPX files.
 var StartElement = xml.StartElement{
@@ -573,4 +578,179 @@ func newWptTypes(g *geom.LineString) []*WptType {
 		wpts[i] = wpt
 	}
 	return wpts
+}
+
+// SpeedBetween calculates the speed between two WptType.
+func (w *WptType) SpeedBetween(pt WptType, threeD bool) float64 {
+	seconds := w.TimeDiff(pt)
+	var distLen float64
+	if threeD {
+		distLen = w.Distance3D(pt)
+	} else {
+		distLen = w.Distance2D(pt)
+	}
+	return distLen / seconds
+}
+
+// TimeDiff returns the time difference of two WptType in seconds.
+func (w *WptType) TimeDiff(pt WptType) float64 {
+	t1 := w.Time
+	t2 := pt.Time
+	if t1.Equal(t2) {
+		return 0.0
+	}
+	var delta time.Duration
+	if t1.After(t2) {
+		delta = t1.Sub(t2)
+	} else {
+		delta = t2.Sub(t1)
+	}
+	return delta.Seconds()
+}
+
+// Distance2D returns the 2D distance of two WptType.
+func (w *WptType) Distance2D(pt WptType) float64 {
+	return distance(w.Lat, w.Lon, 0, pt.Lat, pt.Lon, 0, false, false)
+}
+
+// Distance3D returns the 3D distance of two WptType.
+func (w *WptType) Distance3D(pt WptType) float64 {
+	return distance(w.Lat, w.Lon, w.Ele, pt.Lat, pt.Lon, pt.Ele, true, false)
+}
+
+// Distance returns the 2D or 3D distance of two WptType.
+func distance(lat1, lon1, ele1, lat2, lon2, ele2 float64, threeD, haversine bool) float64 {
+	absLat := math.Abs(lat1 - lat2)
+	absLon := math.Abs(lon1 - lon2)
+	if haversine || absLat > 0.2 || absLon > 0.2 {
+		return HaversineDistance(lat1, lon1, lat2, lon2)
+	}
+
+	coef := math.Cos(toRadians(lat1))
+	x := lat1 - lat2
+	y := (lon1 - lon2) * coef
+
+	distance2d := math.Sqrt(x*x+y*y) * oneDegree
+
+	if !threeD || ele1 == ele2 {
+		return distance2d
+	}
+
+	eleDiff := ele1 - ele2
+
+	return math.Sqrt(math.Pow(distance2d, 2) + math.Pow(eleDiff, 2))
+}
+
+// HaversineDistance returns the haversine distance between two points.
+//
+// Implemented from http://www.movable-type.co.uk/scripts/latlong.html
+func HaversineDistance(lat1, lon1, lat2, lon2 float64) float64 {
+	dLat := toRadians(lat1 - lat2)
+	dLon := toRadians(lon1 - lon2)
+	thisLat1 := toRadians(lat1)
+	thisLat2 := toRadians(lat2)
+
+	a := math.Sin(dLat/2)*math.Sin(dLat/2) + math.Sin(dLon/2)*math.Sin(dLon/2)*math.Cos(thisLat1)*math.Cos(thisLat2)
+	c := 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1-a))
+	d := earthRadius * c
+
+	return d
+}
+
+// toRadians converts to radial coordinates.
+func toRadians(x float64) float64 {
+	return x / 180. * math.Pi
+}
+
+func toDegrees(rad float64) float64 {
+	return rad * 180 / math.Pi
+}
+
+func geoToCartesian(coord WptType) (float64, float64, float64) {
+	latRad := toRadians(coord.Lat)
+	lonRad := toRadians(coord.Lon)
+
+	r := earthRadius + coord.Ele
+
+	x := r * math.Cos(latRad) * math.Cos(lonRad)
+	y := r * math.Cos(latRad) * math.Sin(lonRad)
+	z := r * math.Sin(latRad)
+
+	return x, y, z
+}
+
+func cartesianToGeo(x, y, z float64) WptType {
+	r := math.Sqrt(x*x + y*y + z*z)
+	latRad := math.Asin(z / r)
+	lonRad := math.Atan2(y, x)
+
+	lat := toDegrees(latRad)
+	lon := toDegrees(lonRad)
+	alt := r - earthRadius
+
+	return WptType{Lat: lat, Lon: lon, Ele: alt}
+}
+
+func midpoint(coord1, coord2 WptType) WptType {
+	x1, y1, z1 := geoToCartesian(coord1)
+	x2, y2, z2 := geoToCartesian(coord2)
+
+	xMid := (x1 + x2) / 2
+	yMid := (y1 + y2) / 2
+	zMid := (z1 + z2) / 2
+
+	return cartesianToGeo(xMid, yMid, zMid)
+}
+
+func (g *GPX) MaxSpeed(max float64, fix bool) []WptType {
+	var result []WptType
+
+	for _, TrkType := range g.Trk {
+		for _, TrkSegType := range TrkType.TrkSeg {
+			for wptTypeNo, WptType := range TrkSegType.TrkPt {
+				if wptTypeNo != len(TrkSegType.TrkPt)-1 {
+					speed := WptType.SpeedBetween(*TrkSegType.TrkPt[wptTypeNo+1], false)
+					if speed > max {
+						TrkSegType.maxSpeedFix(wptTypeNo, fix)
+						speed := WptType.SpeedBetween(*TrkSegType.TrkPt[wptTypeNo+1], false)
+
+						TrkSegType.TrkPt[wptTypeNo].Speed = speed
+						result = append(result, *TrkSegType.TrkPt[wptTypeNo])
+					}
+				}
+			}
+		}
+	}
+
+	return result
+}
+
+func (ts *TrkSegType) maxSpeedFix(wptTypeNo int, fix bool) {
+	if fix {
+		closest := ts.findClosestPoint(wptTypeNo, 5)
+		if closest == 0 {
+			return
+		}
+		mid := midpoint(*ts.TrkPt[wptTypeNo], *ts.TrkPt[closest])
+		ts.TrkPt[wptTypeNo+1].Lat = mid.Lat
+		ts.TrkPt[wptTypeNo+1].Lon = mid.Lon
+		ts.TrkPt[wptTypeNo+1].Ele = mid.Ele
+	}
+}
+
+func (ts *TrkSegType) findClosestPoint(start, num int) int {
+	var minDistance float64
+	var minDistanceIndex int
+	for i := start + 1; i < len(ts.TrkPt); i++ {
+		num--
+		if num == 0 {
+			break
+		}
+		distance := ts.TrkPt[start].Distance2D(*ts.TrkPt[i])
+		if distance < minDistance || minDistance == 0 {
+			minDistance = distance
+			minDistanceIndex = i
+		}
+	}
+	return minDistanceIndex
 }
