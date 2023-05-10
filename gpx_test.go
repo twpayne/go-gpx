@@ -3,7 +3,9 @@ package gpx_test
 import (
 	"bytes"
 	"encoding/xml"
+	"io/fs"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
@@ -611,19 +613,30 @@ func TestTime(t *testing.T) {
 }
 
 func TestParseExamples(t *testing.T) {
-	for _, filename := range []string{
-		"testdata/ashland.gpx",
-		"testdata/fells_loop.gpx",
-		"testdata/mystic_basin_trail.gpx",
-	} {
-		t.Run(filename, func(t *testing.T) {
-			f, err := os.Open(filename)
-			assert.NoError(t, err)
-			defer f.Close()
-			_, err = gpx.Read(f)
-			assert.NoError(t, err)
-		})
-	}
+	dir := "testdata"
+	err := fs.WalkDir(os.DirFS(dir), ".", func(filename string, d fs.DirEntry, errs error) error {
+		if d.IsDir() {
+			return nil
+		}
+		f, err := os.Open(filepath.Join(dir, filename))
+		assert.NoError(t, err)
+		defer f.Close()
+		g, err := gpx.Read(f)
+		assert.NoError(t, err)
+
+		sb := &strings.Builder{}
+
+		err = g.WriteIndent(sb, "", "\t")
+		assert.NoError(t, err)
+
+		g1, err := gpx.Read(bytes.NewBufferString(sb.String()))
+		assert.NoError(t, err)
+
+		assert.Equal(t, g, g1)
+
+		return nil
+	})
+	assert.NoError(t, err)
 }
 
 func TestCopyrightTypeYear(t *testing.T) {
