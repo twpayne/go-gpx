@@ -77,8 +77,8 @@ type GPX struct {
 	Desc     string      `xml:"desc,omitempty"`
 	Author   string      `xml:"author,omitempty"`
 	Email    *EmailType  `xml:"email,omitempty"`
-	Url      string      `xml:"url,omitempty"`
-	UrlName  string      `xml:"urlname,omitempty"`
+	URL      string      `xml:"url,omitempty"`
+	URLName  string      `xml:"urlname,omitempty"`
 	Time     string      `xml:"time,omitempty"`
 	Keywords string      `xml:"keywords,omitempty"`
 	Bounds   *BoundsType `xml:"bounds,omitempty"`
@@ -214,6 +214,34 @@ func Read(r io.Reader) (*GPX, error) {
 
 // MarshalXML implements xml.Marshaler.MarshalXML.
 func (g *GPX) MarshalXML(e *xml.Encoder, _ xml.StartElement) error {
+	start := g.gpxHeader()
+
+	if err := e.EncodeToken(start); err != nil {
+		return err
+	}
+	if err := g.gpxHeader1_0(e); err != nil {
+		return err
+	}
+	if err := e.EncodeElement(g.Metadata, xml.StartElement{Name: xml.Name{Local: "metadata"}}); err != nil {
+		return err
+	}
+	if err := e.EncodeElement(g.Wpt, xml.StartElement{Name: xml.Name{Local: "wpt"}}); err != nil {
+		return err
+	}
+	if err := e.EncodeElement(g.Rte, xml.StartElement{Name: xml.Name{Local: "rte"}}); err != nil {
+		return err
+	}
+	if err := e.EncodeElement(g.Trk, xml.StartElement{Name: xml.Name{Local: "trk"}}); err != nil {
+		return err
+	}
+	if err := e.EncodeElement(g.Extensions, xml.StartElement{Name: xml.Name{Local: "extensions"}}); err != nil {
+		return err
+	}
+	return e.EncodeToken(start.End())
+}
+
+// gpxHeader returns the xml.StartElement for the GPX header.
+func (g *GPX) gpxHeader() xml.StartElement {
 	var xmlSchemaLocations []string
 	baseURL := "http://www.topografix.com/GPX/" + strings.Join(strings.Split(g.Version, "."), "/")
 	attr := []xml.Attr{
@@ -352,9 +380,12 @@ func (g *GPX) MarshalXML(e *xml.Encoder, _ xml.StartElement) error {
 		Name: xml.Name{Local: "gpx"},
 		Attr: attr,
 	}
-	if err := e.EncodeToken(start); err != nil {
-		return err
-	}
+
+	return start
+}
+
+// gpxHeader1_0 writes the GPX header for GPX v1.0.
+func (g *GPX) gpxHeader1_0(e *xml.Encoder) error {
 	// Start GPX v1.0 Schema
 	if len(g.Name) != 0 {
 		if err := e.EncodeElement(g.Name, xml.StartElement{Name: xml.Name{Local: "name"}}); err != nil {
@@ -376,13 +407,13 @@ func (g *GPX) MarshalXML(e *xml.Encoder, _ xml.StartElement) error {
 			return err
 		}
 	}
-	if len(g.Url) != 0 {
-		if err := e.EncodeElement(g.Url, xml.StartElement{Name: xml.Name{Local: "url"}}); err != nil {
+	if len(g.URL) != 0 {
+		if err := e.EncodeElement(g.URL, xml.StartElement{Name: xml.Name{Local: "url"}}); err != nil {
 			return err
 		}
 	}
-	if len(g.UrlName) != 0 {
-		if err := e.EncodeElement(g.UrlName, xml.StartElement{Name: xml.Name{Local: "urlname"}}); err != nil {
+	if len(g.URLName) != 0 {
+		if err := e.EncodeElement(g.URLName, xml.StartElement{Name: xml.Name{Local: "urlname"}}); err != nil {
 			return err
 		}
 	}
@@ -401,23 +432,7 @@ func (g *GPX) MarshalXML(e *xml.Encoder, _ xml.StartElement) error {
 			return err
 		}
 	}
-	// End GPX v1.0 Schema
-	if err := e.EncodeElement(g.Metadata, xml.StartElement{Name: xml.Name{Local: "metadata"}}); err != nil {
-		return err
-	}
-	if err := e.EncodeElement(g.Wpt, xml.StartElement{Name: xml.Name{Local: "wpt"}}); err != nil {
-		return err
-	}
-	if err := e.EncodeElement(g.Rte, xml.StartElement{Name: xml.Name{Local: "rte"}}); err != nil {
-		return err
-	}
-	if err := e.EncodeElement(g.Trk, xml.StartElement{Name: xml.Name{Local: "trk"}}); err != nil {
-		return err
-	}
-	if err := e.EncodeElement(g.Extensions, xml.StartElement{Name: xml.Name{Local: "extensions"}}); err != nil {
-		return err
-	}
-	return e.EncodeToken(start.End())
+	return nil
 }
 
 // Write writes g to w.
