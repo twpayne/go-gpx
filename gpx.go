@@ -73,7 +73,7 @@ type GPX struct {
 	Email    *EmailType  `xml:"email,omitempty"`
 	Url      string      `xml:"url,omitempty"`
 	UrlName  string      `xml:"urlname,omitempty"`
-	Time     time.Time   `xml:"time,omitempty"`
+	Time     string      `xml:"time,omitempty"`
 	Keywords string      `xml:"keywords,omitempty"`
 	Bounds   *BoundsType `xml:"bounds,omitempty"`
 }
@@ -105,7 +105,7 @@ type MetadataType struct {
 	Author     *PersonType     `xml:"author,omitempty"`
 	Copyright  *CopyrightType  `xml:"copyright,omitempty"`
 	Link       []*LinkType     `xml:"link,omitempty"`
-	Time       time.Time       `xml:"time,omitempty"`
+	Time       string          `xml:"time,omitempty"`
 	Keywords   string          `xml:"keywords,omitempty"`
 	Bounds     *BoundsType     `xml:"bounds,omitempty"`
 	Extensions *ExtensionsType `xml:"extensions,omitempty"`
