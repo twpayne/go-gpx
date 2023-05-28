@@ -67,7 +67,7 @@ type GPX struct {
 	Trk                []*TrkType      `xml:"trk,omitempty"`
 	Extensions         *ExtensionsType `xml:"extensions,omitempty"`
 	// From GPX 1.0
-	Name     string      `xml:"name,attr"`
+	Name     string      `xml:"name,omitempty"`
 	Desc     string      `xml:"desc,omitempty"`
 	Author   string      `xml:"author,omitempty"`
 	Email    *EmailType  `xml:"email,omitempty"`
@@ -294,6 +294,53 @@ func (g *GPX) MarshalXML(e *xml.Encoder, _ xml.StartElement) error {
 	if err := e.EncodeToken(start); err != nil {
 		return err
 	}
+	// Start GPX v1.0 Schema
+	if len(g.Name) != 0 {
+		if err := e.EncodeElement(g.Name, xml.StartElement{Name: xml.Name{Local: "name"}}); err != nil {
+			return err
+		}
+	}
+	if len(g.Desc) != 0 {
+		if err := e.EncodeElement(g.Desc, xml.StartElement{Name: xml.Name{Local: "desc"}}); err != nil {
+			return err
+		}
+	}
+	if len(g.Author) != 0 {
+		if err := e.EncodeElement(g.Author, xml.StartElement{Name: xml.Name{Local: "author"}}); err != nil {
+			return err
+		}
+	}
+	if g.Email != nil {
+		if err := e.EncodeElement(g.Email, xml.StartElement{Name: xml.Name{Local: "email"}}); err != nil {
+			return err
+		}
+	}
+	if len(g.Url) != 0 {
+		if err := e.EncodeElement(g.Url, xml.StartElement{Name: xml.Name{Local: "url"}}); err != nil {
+			return err
+		}
+	}
+	if len(g.UrlName) != 0 {
+		if err := e.EncodeElement(g.UrlName, xml.StartElement{Name: xml.Name{Local: "urlname"}}); err != nil {
+			return err
+		}
+	}
+	if len(g.Time) != 0 {
+		if err := e.EncodeElement(g.Time, xml.StartElement{Name: xml.Name{Local: "time"}}); err != nil {
+			return err
+		}
+	}
+	if len(g.Keywords) != 0 {
+		if err := e.EncodeElement(g.Keywords, xml.StartElement{Name: xml.Name{Local: "keywords"}}); err != nil {
+			return err
+		}
+	}
+	if g.Bounds != nil {
+		if err := e.EncodeElement(g.Bounds, xml.StartElement{Name: xml.Name{Local: "bounds"}}); err != nil {
+			return err
+		}
+	}
+	// End GPX v1.0 Schema
 	if err := e.EncodeElement(g.Metadata, xml.StartElement{Name: xml.Name{Local: "metadata"}}); err != nil {
 		return err
 	}
