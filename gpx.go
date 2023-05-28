@@ -57,6 +57,7 @@ type GPX struct {
 	XMLNsTopografix    string          `xml:"topografix,attr,omitempty"`
 	XMLNsOsmand        string          `xml:"osmand,attr,omitempty"`
 	XMLNsGPXX          string          `xml:"gpxx,attr,omitempty"`
+	XMLNsGPXData       string          `xml:"gpxdata,attr,omitempty"`
 	XMLNsGPXExtensions string          `xml:"gpxtpx,attr,omitempty"`
 	Version            string          `xml:"version,attr"`
 	Creator            string          `xml:"creator,attr"`
@@ -250,6 +251,17 @@ func (g *GPX) MarshalXML(e *xml.Encoder, _ xml.StartElement) error {
 			Value: g.XMLNsTopografix,
 		})
 	}
+	if len(g.XMLNsGPXData) != 0 {
+		g.XMLNsGPXData = "http://www.cluetrust.com/XML/GPXDATA/1/0"
+		xmlSchemaLocations = append([]string{
+			g.XMLNsGPXData,
+			"http://www.cluetrust.com/Schemas/gpxdata10.xsd",
+		}, xmlSchemaLocations...)
+		attr = append(attr, xml.Attr{
+			Name:  xml.Name{Local: "xmlns:gpxdata"},
+			Value: g.XMLNsGPXData,
+		})
+	}
 	if len(g.XMLNsOsmand) != 0 {
 		attr = append(attr, xml.Attr{
 			Name:  xml.Name{Local: "xmlns:osmand"},
@@ -282,6 +294,9 @@ func (g *GPX) MarshalXML(e *xml.Encoder, _ xml.StartElement) error {
 		return err
 	}
 	if err := e.EncodeElement(g.Trk, xml.StartElement{Name: xml.Name{Local: "trk"}}); err != nil {
+		return err
+	}
+	if err := e.EncodeElement(g.Extensions, xml.StartElement{Name: xml.Name{Local: "extensions"}}); err != nil {
 		return err
 	}
 	return e.EncodeToken(start.End())
