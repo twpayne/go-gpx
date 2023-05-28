@@ -69,7 +69,7 @@ type GPX struct {
 	// From GPX 1.0
 	Name     string      `xml:"name,attr"`
 	Desc     string      `xml:"desc,omitempty"`
-	Author   *PersonType `xml:"author,omitempty"`
+	Author   string      `xml:"author,omitempty"`
 	Email    *EmailType  `xml:"email,omitempty"`
 	Url      string      `xml:"url,omitempty"`
 	UrlName  string      `xml:"urlname,omitempty"`
