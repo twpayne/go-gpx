@@ -50,16 +50,21 @@ type ExtensionsType struct {
 
 // A GPX is a gpxType.
 type GPX struct {
-	XMLName            string            `xml:"gpx"`
-	XMLSchemaLocations []string          `xml:"xsi:schemaLocation,attr"`
-	XMLAttrs           map[string]string `xml:"-"`
-	Version            string            `xml:"version,attr"`
-	Creator            string            `xml:"creator,attr"`
-	Metadata           *MetadataType     `xml:"metadata,omitempty"`
-	Wpt                []*WptType        `xml:"wpt,omitempty"`
-	Rte                []*RteType        `xml:"rte,omitempty"`
-	Trk                []*TrkType        `xml:"trk,omitempty"`
-	Extensions         *ExtensionsType   `xml:"extensions"`
+	XMLName            string          `xml:"gpx"`
+	XMLNs              string          `xml:"xmlns,attr,omitempty"`
+	XMLNsXSI           string          `xml:"xsi,attr,omitempty"`
+	XMLSchemaLocations string          `xml:"schemaLocation,attr"`
+	XMLNsTopografix    string          `xml:"topografix,attr,omitempty"`
+	XMLNsOsmand        string          `xml:"osmand,attr,omitempty"`
+	XMLNsGPXX          string          `xml:"gpxx,attr,omitempty"`
+	XMLNsGPXExtensions string          `xml:"gpxtpx,attr,omitempty"`
+	Version            string          `xml:"version,attr"`
+	Creator            string          `xml:"creator,attr"`
+	Metadata           *MetadataType   `xml:"metadata,omitempty"`
+	Wpt                []*WptType      `xml:"wpt,omitempty"`
+	Rte                []*RteType      `xml:"rte,omitempty"`
+	Trk                []*TrkType      `xml:"trk,omitempty"`
+	Extensions         *ExtensionsType `xml:"extensions"`
 }
 
 // A LinkType is a linkType.
@@ -71,9 +76,15 @@ type LinkType struct {
 
 // A PersonType is a personType.
 type PersonType struct {
-	Name  string    `xml:"name,omitempty"`
-	Email string    `xml:"email,omitempty"`
-	Link  *LinkType `xml:"link,omitempty"`
+	Name  string     `xml:"name,omitempty"`
+	Email *EmailType `xml:"email,omitempty"`
+	Link  *LinkType  `xml:"link,omitempty"`
+}
+
+// An EmailType is an emailType.
+type EmailType struct {
+	Name   string `xml:"id,attr"`
+	Domain string `xml:"domain,attr"`
 }
 
 // A MetadataType is a metadataType.
@@ -186,11 +197,8 @@ func Read(r io.Reader) (*GPX, error) {
 
 // MarshalXML implements xml.Marshaler.MarshalXML.
 func (g *GPX) MarshalXML(e *xml.Encoder, _ xml.StartElement) error {
+	var xmlSchemaLocations []string
 	baseURL := "http://www.topografix.com/GPX/" + strings.Join(strings.Split(g.Version, "."), "/")
-	xmlSchemaLocations := append([]string{
-		baseURL,
-		baseURL + "/gpx.xsd",
-	}, g.XMLSchemaLocations...)
 	attr := []xml.Attr{
 		{
 			Name:  xml.Name{Local: "version"},
@@ -208,17 +216,55 @@ func (g *GPX) MarshalXML(e *xml.Encoder, _ xml.StartElement) error {
 			Name:  xml.Name{Local: "xmlns"},
 			Value: baseURL,
 		},
-		{
-			Name:  xml.Name{Local: "xsi:schemaLocation"},
-			Value: strings.Join(xmlSchemaLocations, " "),
-		},
 	}
-	for k, v := range g.XMLAttrs {
+	if len(g.XMLNsGPXX) != 0 {
+		g.XMLNsGPXX = "http://www.garmin.com/xmlschemas/GpxExtensions/v3"
+		xmlSchemaLocations = append([]string{
+			g.XMLNsGPXX,
+			"http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd",
+		}, xmlSchemaLocations...)
 		attr = append(attr, xml.Attr{
-			Name:  xml.Name{Local: k},
-			Value: v,
+			Name:  xml.Name{Local: "xmlns:gpxx"},
+			Value: g.XMLNsGPXX,
 		})
 	}
+	if len(g.XMLNsGPXExtensions) != 0 {
+		g.XMLNsGPXExtensions = "http://www.garmin.com/xmlschemas/TrackPointExtension/v2"
+		xmlSchemaLocations = append([]string{
+			g.XMLNsGPXExtensions,
+			"http://www.garmin.com/xmlschemas/TrackPointExtensionv2.xsd",
+		}, xmlSchemaLocations...)
+		attr = append(attr, xml.Attr{
+			Name:  xml.Name{Local: "xmlns:gpxtpx"},
+			Value: g.XMLNsGPXExtensions,
+		})
+	}
+	if len(g.XMLNsTopografix) != 0 {
+		g.XMLNsTopografix = "http://www.topografix.com/GPX/Private/TopoGrafix/0/4"
+		xmlSchemaLocations = append([]string{
+			g.XMLNsTopografix,
+			g.XMLNsTopografix + "/topografix.xsd",
+		}, xmlSchemaLocations...)
+		attr = append(attr, xml.Attr{
+			Name:  xml.Name{Local: "xmlns:topografix"},
+			Value: g.XMLNsTopografix,
+		})
+	}
+	if len(g.XMLNsOsmand) != 0 {
+		attr = append(attr, xml.Attr{
+			Name:  xml.Name{Local: "xmlns:osmand"},
+			Value: g.XMLNsOsmand,
+		})
+	}
+	xmlSchemaLocations = append([]string{
+		baseURL,
+		baseURL + "/gpx.xsd",
+	}, xmlSchemaLocations...)
+	g.XMLSchemaLocations = strings.Join(xmlSchemaLocations, " ")
+	attr = append(attr, xml.Attr{
+		Name:  xml.Name{Local: "xsi:schemaLocation"},
+		Value: g.XMLSchemaLocations,
+	})
 	start := xml.StartElement{
 		Name: xml.Name{Local: "gpx"},
 		Attr: attr,
