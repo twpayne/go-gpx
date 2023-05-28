@@ -55,11 +55,8 @@ type GPX struct {
 	XMLNsXSI           string          `xml:"xsi,attr,omitempty"`
 	XMLSchemaLocations string          `xml:"schemaLocation,attr"`
 	XMLNsTopografix    string          `xml:"topografix,attr,omitempty"`
-	XMLNsOsmand        string          `xml:"osmand,attr,omitempty"`
-	XMLNsGPXX          string          `xml:"gpxx,attr,omitempty"`
 	XMLNsGPXData       string          `xml:"gpxdata,attr,omitempty"`
-	XMLNsGPXExtensions string          `xml:"gpxtpx,attr,omitempty"`
-	XMLNsWptx1         string          `xml:"wptx1,attr,omitempty"`
+	XMLNsOsmand        string          `xml:"osmand,attr,omitempty"`
 	Version            string          `xml:"version,attr"`
 	Creator            string          `xml:"creator,attr"`
 	Metadata           *MetadataType   `xml:"metadata,omitempty"`
@@ -67,6 +64,14 @@ type GPX struct {
 	Rte                []*RteType      `xml:"rte,omitempty"`
 	Trk                []*TrkType      `xml:"trk,omitempty"`
 	Extensions         *ExtensionsType `xml:"extensions,omitempty"`
+	// Garmin schemas
+	XMLNsGPXX   string `xml:"gpxx,attr,omitempty"`
+	XMLNsGpxacc string `xml:"gpxacc,attr,omitempty"`
+	XMLNsGpxpx  string `xml:"gpxpx,attr,omitempty"`
+	XMLNsGpxtpx string `xml:"gpxtpx,attr,omitempty"`
+	XMLNsTC2    string `xml:"tc2,attr,omitempty"`
+	XMLNsTrp    string `xml:"trp,attr,omitempty"`
+	XMLNsWptx1  string `xml:"wptx1,attr,omitempty"`
 	// From GPX 1.0
 	Name     string      `xml:"name,omitempty"`
 	Desc     string      `xml:"desc,omitempty"`
@@ -240,15 +245,15 @@ func (g *GPX) MarshalXML(e *xml.Encoder, _ xml.StartElement) error {
 			Value: g.XMLNsGPXX,
 		})
 	}
-	if len(g.XMLNsGPXExtensions) != 0 {
-		g.XMLNsGPXExtensions = "http://www.garmin.com/xmlschemas/TrackPointExtension/v2"
+	if len(g.XMLNsGpxtpx) != 0 {
+		g.XMLNsGpxtpx = "http://www.garmin.com/xmlschemas/TrackPointExtension/v2"
 		xmlSchemaLocations = append([]string{
-			g.XMLNsGPXExtensions,
+			g.XMLNsGpxtpx,
 			"http://www.garmin.com/xmlschemas/TrackPointExtensionv2.xsd",
 		}, xmlSchemaLocations...)
 		attr = append(attr, xml.Attr{
 			Name:  xml.Name{Local: "xmlns:gpxtpx"},
-			Value: g.XMLNsGPXExtensions,
+			Value: g.XMLNsGpxtpx,
 		})
 	}
 	if len(g.XMLNsWptx1) != 0 {
@@ -260,6 +265,50 @@ func (g *GPX) MarshalXML(e *xml.Encoder, _ xml.StartElement) error {
 		attr = append(attr, xml.Attr{
 			Name:  xml.Name{Local: "xmlns:wptx1"},
 			Value: g.XMLNsWptx1,
+		})
+	}
+	if len(g.XMLNsGpxpx) != 0 {
+		g.XMLNsGpxpx = "http://www.garmin.com/xmlschemas/PowerExtension/v1"
+		xmlSchemaLocations = append([]string{
+			g.XMLNsGpxpx,
+			"http://www.garmin.com/xmlschemas/PowerExtensionv1.xsd",
+		}, xmlSchemaLocations...)
+		attr = append(attr, xml.Attr{
+			Name:  xml.Name{Local: "xmlns:gpxpx"},
+			Value: g.XMLNsGpxpx,
+		})
+	}
+	if len(g.XMLNsTrp) != 0 {
+		g.XMLNsTrp = "http://www.garmin.com/xmlschemas/TripExtensions/v1"
+		xmlSchemaLocations = append([]string{
+			g.XMLNsTrp,
+			"https://www8.garmin.com/xmlschemas/TripExtensionsv1.xsd",
+		}, xmlSchemaLocations...)
+		attr = append(attr, xml.Attr{
+			Name:  xml.Name{Local: "xmlns:trp"},
+			Value: g.XMLNsTrp,
+		})
+	}
+	if len(g.XMLNsGpxacc) != 0 {
+		g.XMLNsGpxacc = "http://www.garmin.com/xmlschemas/AccelerationExtension/v1"
+		xmlSchemaLocations = append([]string{
+			g.XMLNsGpxacc,
+			"http://www.garmin.com/xmlschemas/AccelerationExtensionv1.xsd",
+		}, xmlSchemaLocations...)
+		attr = append(attr, xml.Attr{
+			Name:  xml.Name{Local: "xmlns:gpxacc"},
+			Value: g.XMLNsGpxacc,
+		})
+	}
+	if len(g.XMLNsTC2) != 0 {
+		g.XMLNsTC2 = "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
+		xmlSchemaLocations = append([]string{
+			g.XMLNsTC2,
+			"https://www8.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd",
+		}, xmlSchemaLocations...)
+		attr = append(attr, xml.Attr{
+			Name:  xml.Name{Local: "xmlns:tc2"},
+			Value: g.XMLNsTC2,
 		})
 	}
 	if len(g.XMLNsTopografix) != 0 {
