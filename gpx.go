@@ -59,6 +59,7 @@ type GPX struct {
 	XMLNsGPXX          string          `xml:"gpxx,attr,omitempty"`
 	XMLNsGPXData       string          `xml:"gpxdata,attr,omitempty"`
 	XMLNsGPXExtensions string          `xml:"gpxtpx,attr,omitempty"`
+	XMLNsWptx1         string          `xml:"wptx1,attr,omitempty"`
 	Version            string          `xml:"version,attr"`
 	Creator            string          `xml:"creator,attr"`
 	Metadata           *MetadataType   `xml:"metadata,omitempty"`
@@ -248,6 +249,17 @@ func (g *GPX) MarshalXML(e *xml.Encoder, _ xml.StartElement) error {
 		attr = append(attr, xml.Attr{
 			Name:  xml.Name{Local: "xmlns:gpxtpx"},
 			Value: g.XMLNsGPXExtensions,
+		})
+	}
+	if len(g.XMLNsWptx1) != 0 {
+		g.XMLNsWptx1 = "http://www.garmin.com/xmlschemas/WaypointExtension/v1"
+		xmlSchemaLocations = append([]string{
+			g.XMLNsWptx1,
+			"http://www.garmin.com/xmlschemas/WaypointExtensionv1.xsd",
+		}, xmlSchemaLocations...)
+		attr = append(attr, xml.Attr{
+			Name:  xml.Name{Local: "xmlns:wptx1"},
+			Value: g.XMLNsWptx1,
 		})
 	}
 	if len(g.XMLNsTopografix) != 0 {
