@@ -66,6 +66,16 @@ type GPX struct {
 	Rte                []*RteType      `xml:"rte,omitempty"`
 	Trk                []*TrkType      `xml:"trk,omitempty"`
 	Extensions         *ExtensionsType `xml:"extensions"`
+	// From GPX 1.0
+	Name     string      `xml:"name,attr"`
+	Desc     string      `xml:"desc,omitempty"`
+	Author   *PersonType `xml:"author,omitempty"`
+	Email    *EmailType  `xml:"email,omitempty"`
+	Url      string      `xml:"url,omitempty"`
+	UrlName  string      `xml:"urlname,omitempty"`
+	Time     time.Time   `xml:"time,omitempty"`
+	Keywords string      `xml:"keywords,omitempty"`
+	Bounds   *BoundsType `xml:"bounds,omitempty"`
 }
 
 // A LinkType is a linkType.
