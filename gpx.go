@@ -59,7 +59,7 @@ type GPX struct {
 	Wpt                []*WptType        `xml:"wpt,omitempty"`
 	Rte                []*RteType        `xml:"rte,omitempty"`
 	Trk                []*TrkType        `xml:"trk,omitempty"`
-	Extensions         *ExtensionsType   `xml:"extensions"`
+	Extensions         *ExtensionsType   `xml:"extensions,omitempty"`
 }
 
 // A LinkType is a linkType.
