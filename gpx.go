@@ -71,9 +71,15 @@ type LinkType struct {
 
 // A PersonType is a personType.
 type PersonType struct {
-	Name  string    `xml:"name,omitempty"`
-	Email string    `xml:"email,omitempty"`
-	Link  *LinkType `xml:"link,omitempty"`
+	Name  string     `xml:"name,omitempty"`
+	Email *EmailType `xml:"email,omitempty"`
+	Link  *LinkType  `xml:"link,omitempty"`
+}
+
+// An EmailType is an emailType.
+type EmailType struct {
+	Name   string `xml:"id,attr"`
+	Domain string `xml:"domain,attr"`
 }
 
 // A MetadataType is a metadataType.
