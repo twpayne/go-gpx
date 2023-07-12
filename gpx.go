@@ -83,10 +83,10 @@ type MetadataType struct {
 	Author     *PersonType     `xml:"author,omitempty"`
 	Copyright  *CopyrightType  `xml:"copyright,omitempty"`
 	Link       []*LinkType     `xml:"link,omitempty"`
-	Time       time.Time       `xml:"time,omitempty"`
+	Time       string          `xml:"time,omitempty"`
 	Keywords   string          `xml:"keywords,omitempty"`
 	Bounds     *BoundsType     `xml:"bounds,omitempty"`
-	Extensions *ExtensionsType `xml:"extensions"`
+	Extensions *ExtensionsType `xml:"extensions,omitempty"`
 }
 
 // A RteType is a rteType.
@@ -98,14 +98,14 @@ type RteType struct {
 	Link       []*LinkType     `xml:"link,omitempty"`
 	Number     int             `xml:"number,omitempty"`
 	Type       string          `xml:"type,omitempty"`
-	Extensions *ExtensionsType `xml:"extensions"`
+	Extensions *ExtensionsType `xml:"extensions,omitempty"`
 	RtePt      []*WptType      `xml:"rtept,omitempty"`
 }
 
 // A TrkSegType is a trkSegType.
 type TrkSegType struct {
 	TrkPt      []*WptType      `xml:"trkpt,omitempty"`
-	Extensions *ExtensionsType `xml:"extensions"`
+	Extensions *ExtensionsType `xml:"extensions,omitempty"`
 }
 
 // A TrkType is a trkType.
@@ -117,7 +117,7 @@ type TrkType struct {
 	Link       []*LinkType     `xml:"link,omitempty"`
 	Number     int             `xml:"number,omitempty"`
 	Type       string          `xml:"type,omitempty"`
-	Extensions *ExtensionsType `xml:"extensions"`
+	Extensions *ExtensionsType `xml:"extensions,omitempty"`
 	TrkSeg     []*TrkSegType   `xml:"trkseg,omitempty"`
 }
 
