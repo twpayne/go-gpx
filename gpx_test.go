@@ -473,8 +473,11 @@ func TestRoundTrip(t *testing.T) {
 				" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd\">" +
 				"</gpx>",
 			gpx: &gpx.GPX{
-				Version: "1.0",
-				Creator: "ExpertGPS 1.1 - http://www.topografix.com",
+				Version:            "1.0",
+				Creator:            "ExpertGPS 1.1 - http://www.topografix.com",
+				XMLNsXSI:           "http://www.w3.org/2001/XMLSchema-instance",
+				XMLNs:              "http://www.topografix.com/GPX/1/0",
+				XMLSchemaLocations: "http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd",
 			},
 		},
 		{
@@ -494,8 +497,11 @@ func TestRoundTrip(t *testing.T) {
 				"\t</wpt>\n" +
 				"</gpx>",
 			gpx: &gpx.GPX{
-				Version: "1.0",
-				Creator: "ExpertGPS 1.1 - http://www.topografix.com",
+				Version:            "1.0",
+				Creator:            "ExpertGPS 1.1 - http://www.topografix.com",
+				XMLNsXSI:           "http://www.w3.org/2001/XMLSchema-instance",
+				XMLNs:              "http://www.topografix.com/GPX/1/0",
+				XMLSchemaLocations: "http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd",
 				Wpt: []*gpx.WptType{
 					{
 						Lat:  42.438878,
@@ -541,8 +547,11 @@ func TestRoundTrip(t *testing.T) {
 				"\t</rte>\n" +
 				"</gpx>",
 			gpx: &gpx.GPX{
-				Version: "1.0",
-				Creator: "ExpertGPS 1.1 - http://www.topografix.com",
+				Version:            "1.0",
+				Creator:            "ExpertGPS 1.1 - http://www.topografix.com",
+				XMLNsXSI:           "http://www.w3.org/2001/XMLSchema-instance",
+				XMLNs:              "http://www.topografix.com/GPX/1/0",
+				XMLSchemaLocations: "http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd",
 				Rte: []*gpx.RteType{
 					{
 						Name:   "BELLEVUE",

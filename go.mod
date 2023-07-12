@@ -1,4 +1,4 @@
-module github.com/twpayne/go-gpx
+module github.com/inode64/go-gpx
 
 go 1.19
 

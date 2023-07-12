@@ -50,16 +50,38 @@ type ExtensionsType struct {
 
 // A GPX is a gpxType.
 type GPX struct {
-	XMLName            string            `xml:"gpx"`
-	XMLSchemaLocations []string          `xml:"xsi:schemaLocation,attr"`
-	XMLAttrs           map[string]string `xml:"-"`
-	Version            string            `xml:"version,attr"`
-	Creator            string            `xml:"creator,attr"`
-	Metadata           *MetadataType     `xml:"metadata,omitempty"`
-	Wpt                []*WptType        `xml:"wpt,omitempty"`
-	Rte                []*RteType        `xml:"rte,omitempty"`
-	Trk                []*TrkType        `xml:"trk,omitempty"`
-	Extensions         *ExtensionsType   `xml:"extensions"`
+	XMLName            string          `xml:"gpx"`
+	XMLNs              string          `xml:"xmlns,attr,omitempty"`
+	XMLNsXSI           string          `xml:"xsi,attr,omitempty"`
+	XMLSchemaLocations string          `xml:"schemaLocation,attr"`
+	XMLNsTopografix    string          `xml:"topografix,attr,omitempty"`
+	XMLNsGPXData       string          `xml:"gpxdata,attr,omitempty"`
+	XMLNsOsmand        string          `xml:"osmand,attr,omitempty"`
+	Version            string          `xml:"version,attr"`
+	Creator            string          `xml:"creator,attr"`
+	Metadata           *MetadataType   `xml:"metadata,omitempty"`
+	Wpt                []*WptType      `xml:"wpt,omitempty"`
+	Rte                []*RteType      `xml:"rte,omitempty"`
+	Trk                []*TrkType      `xml:"trk,omitempty"`
+	Extensions         *ExtensionsType `xml:"extensions,omitempty"`
+	// Garmin schemas
+	XMLNsGPXX   string `xml:"gpxx,attr,omitempty"`
+	XMLNsGpxacc string `xml:"gpxacc,attr,omitempty"`
+	XMLNsGpxpx  string `xml:"gpxpx,attr,omitempty"`
+	XMLNsGpxtpx string `xml:"gpxtpx,attr,omitempty"`
+	XMLNsTC2    string `xml:"tc2,attr,omitempty"`
+	XMLNsTrp    string `xml:"trp,attr,omitempty"`
+	XMLNsWptx1  string `xml:"wptx1,attr,omitempty"`
+	// From GPX 1.0
+	Name     string      `xml:"name,omitempty"`
+	Desc     string      `xml:"desc,omitempty"`
+	Author   string      `xml:"author,omitempty"`
+	Email    *EmailType  `xml:"email,omitempty"`
+	URL      string      `xml:"url,omitempty"`
+	URLName  string      `xml:"urlname,omitempty"`
+	Time     string      `xml:"time,omitempty"`
+	Keywords string      `xml:"keywords,omitempty"`
+	Bounds   *BoundsType `xml:"bounds,omitempty"`
 }
 
 // A LinkType is a linkType.
@@ -89,10 +111,10 @@ type MetadataType struct {
 	Author     *PersonType     `xml:"author,omitempty"`
 	Copyright  *CopyrightType  `xml:"copyright,omitempty"`
 	Link       []*LinkType     `xml:"link,omitempty"`
-	Time       time.Time       `xml:"time,omitempty"`
+	Time       string          `xml:"time,omitempty"`
 	Keywords   string          `xml:"keywords,omitempty"`
 	Bounds     *BoundsType     `xml:"bounds,omitempty"`
-	Extensions *ExtensionsType `xml:"extensions"`
+	Extensions *ExtensionsType `xml:"extensions,omitempty"`
 }
 
 // A RteType is a rteType.
@@ -104,7 +126,7 @@ type RteType struct {
 	Link       []*LinkType     `xml:"link,omitempty"`
 	Number     int             `xml:"number,omitempty"`
 	Type       string          `xml:"type,omitempty"`
-	Extensions *ExtensionsType `xml:"extensions"`
+	Extensions *ExtensionsType `xml:"extensions,omitempty"`
 	RtePt      []*WptType      `xml:"rtept,omitempty"`
 }
 
@@ -123,7 +145,7 @@ type TrkType struct {
 	Link       []*LinkType     `xml:"link,omitempty"`
 	Number     int             `xml:"number,omitempty"`
 	Type       string          `xml:"type,omitempty"`
-	Extensions *ExtensionsType `xml:"extensions"`
+	Extensions *ExtensionsType `xml:"extensions,omitempty"`
 	TrkSeg     []*TrkSegType   `xml:"trkseg,omitempty"`
 }
 
@@ -192,11 +214,36 @@ func Read(r io.Reader) (*GPX, error) {
 
 // MarshalXML implements xml.Marshaler.MarshalXML.
 func (g *GPX) MarshalXML(e *xml.Encoder, _ xml.StartElement) error {
+	start := g.gpxHeader()
+
+	if err := e.EncodeToken(start); err != nil {
+		return err
+	}
+	if err := g.gpxHeader1_0(e); err != nil {
+		return err
+	}
+	if err := e.EncodeElement(g.Metadata, xml.StartElement{Name: xml.Name{Local: "metadata"}}); err != nil {
+		return err
+	}
+	if err := e.EncodeElement(g.Wpt, xml.StartElement{Name: xml.Name{Local: "wpt"}}); err != nil {
+		return err
+	}
+	if err := e.EncodeElement(g.Rte, xml.StartElement{Name: xml.Name{Local: "rte"}}); err != nil {
+		return err
+	}
+	if err := e.EncodeElement(g.Trk, xml.StartElement{Name: xml.Name{Local: "trk"}}); err != nil {
+		return err
+	}
+	if err := e.EncodeElement(g.Extensions, xml.StartElement{Name: xml.Name{Local: "extensions"}}); err != nil {
+		return err
+	}
+	return e.EncodeToken(start.End())
+}
+
+// gpxHeader returns the xml.StartElement for the GPX header.
+func (g *GPX) gpxHeader() xml.StartElement {
+	var xmlSchemaLocations []string
 	baseURL := "http://www.topografix.com/GPX/" + strings.Join(strings.Split(g.Version, "."), "/")
-	xmlSchemaLocations := append([]string{
-		baseURL,
-		baseURL + "/gpx.xsd",
-	}, g.XMLSchemaLocations...)
 	attr := []xml.Attr{
 		{
 			Name:  xml.Name{Local: "version"},
@@ -214,37 +261,178 @@ func (g *GPX) MarshalXML(e *xml.Encoder, _ xml.StartElement) error {
 			Name:  xml.Name{Local: "xmlns"},
 			Value: baseURL,
 		},
-		{
-			Name:  xml.Name{Local: "xsi:schemaLocation"},
-			Value: strings.Join(xmlSchemaLocations, " "),
-		},
 	}
-	for k, v := range g.XMLAttrs {
+	if len(g.XMLNsGPXX) != 0 {
+		g.XMLNsGPXX = "http://www.garmin.com/xmlschemas/GpxExtensions/v3"
+		xmlSchemaLocations = append([]string{
+			g.XMLNsGPXX,
+			"http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd",
+		}, xmlSchemaLocations...)
 		attr = append(attr, xml.Attr{
-			Name:  xml.Name{Local: k},
-			Value: v,
+			Name:  xml.Name{Local: "xmlns:gpxx"},
+			Value: g.XMLNsGPXX,
 		})
 	}
+	if len(g.XMLNsGpxtpx) != 0 {
+		g.XMLNsGpxtpx = "http://www.garmin.com/xmlschemas/TrackPointExtension/v2"
+		xmlSchemaLocations = append([]string{
+			g.XMLNsGpxtpx,
+			"http://www.garmin.com/xmlschemas/TrackPointExtensionv2.xsd",
+		}, xmlSchemaLocations...)
+		attr = append(attr, xml.Attr{
+			Name:  xml.Name{Local: "xmlns:gpxtpx"},
+			Value: g.XMLNsGpxtpx,
+		})
+	}
+	if len(g.XMLNsWptx1) != 0 {
+		g.XMLNsWptx1 = "http://www.garmin.com/xmlschemas/WaypointExtension/v1"
+		xmlSchemaLocations = append([]string{
+			g.XMLNsWptx1,
+			"http://www.garmin.com/xmlschemas/WaypointExtensionv1.xsd",
+		}, xmlSchemaLocations...)
+		attr = append(attr, xml.Attr{
+			Name:  xml.Name{Local: "xmlns:wptx1"},
+			Value: g.XMLNsWptx1,
+		})
+	}
+	if len(g.XMLNsGpxpx) != 0 {
+		g.XMLNsGpxpx = "http://www.garmin.com/xmlschemas/PowerExtension/v1"
+		xmlSchemaLocations = append([]string{
+			g.XMLNsGpxpx,
+			"http://www.garmin.com/xmlschemas/PowerExtensionv1.xsd",
+		}, xmlSchemaLocations...)
+		attr = append(attr, xml.Attr{
+			Name:  xml.Name{Local: "xmlns:gpxpx"},
+			Value: g.XMLNsGpxpx,
+		})
+	}
+	if len(g.XMLNsTrp) != 0 {
+		g.XMLNsTrp = "http://www.garmin.com/xmlschemas/TripExtensions/v1"
+		xmlSchemaLocations = append([]string{
+			g.XMLNsTrp,
+			"https://www8.garmin.com/xmlschemas/TripExtensionsv1.xsd",
+		}, xmlSchemaLocations...)
+		attr = append(attr, xml.Attr{
+			Name:  xml.Name{Local: "xmlns:trp"},
+			Value: g.XMLNsTrp,
+		})
+	}
+	if len(g.XMLNsGpxacc) != 0 {
+		g.XMLNsGpxacc = "http://www.garmin.com/xmlschemas/AccelerationExtension/v1"
+		xmlSchemaLocations = append([]string{
+			g.XMLNsGpxacc,
+			"http://www.garmin.com/xmlschemas/AccelerationExtensionv1.xsd",
+		}, xmlSchemaLocations...)
+		attr = append(attr, xml.Attr{
+			Name:  xml.Name{Local: "xmlns:gpxacc"},
+			Value: g.XMLNsGpxacc,
+		})
+	}
+	if len(g.XMLNsTC2) != 0 {
+		g.XMLNsTC2 = "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
+		xmlSchemaLocations = append([]string{
+			g.XMLNsTC2,
+			"https://www8.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd",
+		}, xmlSchemaLocations...)
+		attr = append(attr, xml.Attr{
+			Name:  xml.Name{Local: "xmlns:tc2"},
+			Value: g.XMLNsTC2,
+		})
+	}
+	if len(g.XMLNsTopografix) != 0 {
+		g.XMLNsTopografix = "http://www.topografix.com/GPX/Private/TopoGrafix/0/4"
+		xmlSchemaLocations = append([]string{
+			g.XMLNsTopografix,
+			g.XMLNsTopografix + "/topografix.xsd",
+		}, xmlSchemaLocations...)
+		attr = append(attr, xml.Attr{
+			Name:  xml.Name{Local: "xmlns:topografix"},
+			Value: g.XMLNsTopografix,
+		})
+	}
+	if len(g.XMLNsGPXData) != 0 {
+		g.XMLNsGPXData = "http://www.cluetrust.com/XML/GPXDATA/1/0"
+		xmlSchemaLocations = append([]string{
+			g.XMLNsGPXData,
+			"http://www.cluetrust.com/Schemas/gpxdata10.xsd",
+		}, xmlSchemaLocations...)
+		attr = append(attr, xml.Attr{
+			Name:  xml.Name{Local: "xmlns:gpxdata"},
+			Value: g.XMLNsGPXData,
+		})
+	}
+	if len(g.XMLNsOsmand) != 0 {
+		attr = append(attr, xml.Attr{
+			Name:  xml.Name{Local: "xmlns:osmand"},
+			Value: g.XMLNsOsmand,
+		})
+	}
+	xmlSchemaLocations = append([]string{
+		baseURL,
+		baseURL + "/gpx.xsd",
+	}, xmlSchemaLocations...)
+	g.XMLSchemaLocations = strings.Join(xmlSchemaLocations, " ")
+	attr = append(attr, xml.Attr{
+		Name:  xml.Name{Local: "xsi:schemaLocation"},
+		Value: g.XMLSchemaLocations,
+	})
 	start := xml.StartElement{
 		Name: xml.Name{Local: "gpx"},
 		Attr: attr,
 	}
-	if err := e.EncodeToken(start); err != nil {
-		return err
+
+	return start
+}
+
+// gpxHeader1_0 writes the GPX header for GPX v1.0.
+func (g *GPX) gpxHeader1_0(e *xml.Encoder) error {
+	// Start GPX v1.0 Schema
+	if len(g.Name) != 0 {
+		if err := e.EncodeElement(g.Name, xml.StartElement{Name: xml.Name{Local: "name"}}); err != nil {
+			return err
+		}
 	}
-	if err := e.EncodeElement(g.Metadata, xml.StartElement{Name: xml.Name{Local: "metadata"}}); err != nil {
-		return err
+	if len(g.Desc) != 0 {
+		if err := e.EncodeElement(g.Desc, xml.StartElement{Name: xml.Name{Local: "desc"}}); err != nil {
+			return err
+		}
 	}
-	if err := e.EncodeElement(g.Wpt, xml.StartElement{Name: xml.Name{Local: "wpt"}}); err != nil {
-		return err
+	if len(g.Author) != 0 {
+		if err := e.EncodeElement(g.Author, xml.StartElement{Name: xml.Name{Local: "author"}}); err != nil {
+			return err
+		}
 	}
-	if err := e.EncodeElement(g.Rte, xml.StartElement{Name: xml.Name{Local: "rte"}}); err != nil {
-		return err
+	if g.Email != nil {
+		if err := e.EncodeElement(g.Email, xml.StartElement{Name: xml.Name{Local: "email"}}); err != nil {
+			return err
+		}
 	}
-	if err := e.EncodeElement(g.Trk, xml.StartElement{Name: xml.Name{Local: "trk"}}); err != nil {
-		return err
+	if len(g.URL) != 0 {
+		if err := e.EncodeElement(g.URL, xml.StartElement{Name: xml.Name{Local: "url"}}); err != nil {
+			return err
+		}
 	}
-	return e.EncodeToken(start.End())
+	if len(g.URLName) != 0 {
+		if err := e.EncodeElement(g.URLName, xml.StartElement{Name: xml.Name{Local: "urlname"}}); err != nil {
+			return err
+		}
+	}
+	if len(g.Time) != 0 {
+		if err := e.EncodeElement(g.Time, xml.StartElement{Name: xml.Name{Local: "time"}}); err != nil {
+			return err
+		}
+	}
+	if len(g.Keywords) != 0 {
+		if err := e.EncodeElement(g.Keywords, xml.StartElement{Name: xml.Name{Local: "keywords"}}); err != nil {
+			return err
+		}
+	}
+	if g.Bounds != nil {
+		if err := e.EncodeElement(g.Bounds, xml.StartElement{Name: xml.Name{Local: "bounds"}}); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // Write writes g to w.
