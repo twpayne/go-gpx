@@ -83,7 +83,7 @@ type MetadataType struct {
 	Author     *PersonType     `xml:"author,omitempty"`
 	Copyright  *CopyrightType  `xml:"copyright,omitempty"`
 	Link       []*LinkType     `xml:"link,omitempty"`
-	Time       string          `xml:"time,omitempty"`
+	Time       time.Time       `xml:"time,omitempty"`
 	Keywords   string          `xml:"keywords,omitempty"`
 	Bounds     *BoundsType     `xml:"bounds,omitempty"`
 	Extensions *ExtensionsType `xml:"extensions,omitempty"`
