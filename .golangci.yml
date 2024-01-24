@@ -1,3 +1,6 @@
+run:
+  go: '1.19'
+
 linters:
   enable:
   - asasalint
@@ -7,7 +10,6 @@ linters:
   - containedctx
   - contextcheck
   - decorder
-  - depguard
   - dogsled
   - dupword
   - durationcheck
@@ -21,10 +23,11 @@ linters:
   - forbidigo
   - forcetypeassert
   - gci
+  - ginkgolinter
   - gocheckcompilerdirectives
   - gochecknoinits
+  - gochecksumtype
   - gocognit
-  - goconst
   - gocritic
   - gocyclo
   - godot
@@ -39,15 +42,18 @@ linters:
   - goprintffuncname
   - gosec
   - gosimple
+  - gosmopolitan
   - govet
   - grouper
   - importas
+  - inamedparam
   - ineffassign
   - interfacebloat
   - ireturn
   - loggercheck
   - maintidx
   - makezero
+  - mirror
   - misspell
   - musttag
   - nakedret
@@ -58,11 +64,15 @@ linters:
   - nolintlint
   - nonamedreturns
   - nosprintfhostport
+  - perfsprint
   - prealloc
   - predeclared
   - promlinter
+  - protogetter
   - reassign
   - revive
+  - rowserrcheck
+  - sloglint
   - sqlclosecheck
   - staticcheck
   - stylecheck
@@ -75,23 +85,24 @@ linters:
   - unparam
   - unused
   - usestdlibvars
+  - wastedassign
   - whitespace
+  - zerologlint
   disable:
   - cyclop
+  - depguard
   - dupl
-  - exhaustivestruct
   - exhaustruct
   - funlen
   - gochecknoglobals
+  - goconst
   - gomnd
   - lll
   - nlreturn
   - paralleltest
-  - rowserrcheck # https://github.com/golangci/golangci-lint/issues/2649
   - testableexamples
   - tparallel
   - varnamelen
-  - wastedassign # https://github.com/golangci/golangci-lint/issues/2649
   - wrapcheck
   - wsl
 
@@ -103,7 +114,6 @@ linters-settings:
     - prefix(github.com/twpayne/go-gpx)
   gofumpt:
     extra-rules: true
-    go-version: '1.20'
     module-path: github.com/twpayne/go-gpx
   goimports:
     local-prefixes: github.com/twpayne/go-gpx
