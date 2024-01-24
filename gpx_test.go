@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/alecthomas/assert/v2"
 	geom "github.com/twpayne/go-geom"
 
 	gpx "github.com/twpayne/go-gpx"
