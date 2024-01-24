@@ -157,9 +157,9 @@ type WptType struct {
 // UnmarshalXML implements xml.Unmarshaler.UnmarshalXML.
 func (c *CopyrightType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	alias := struct {
-		Author  string `xml:"author,attr"`
-		Year    string `xml:"year,omitempty"`
-		License string `xml:"license,omitempty"`
+		Author  string  `xml:"author,attr"`
+		Year    *string `xml:"year,omitempty"`
+		License string  `xml:"license,omitempty"`
 	}{}
 
 	err := d.DecodeElement(&alias, &start)
@@ -170,16 +170,20 @@ func (c *CopyrightType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) err
 	c.Author = alias.Author
 	c.License = alias.License
 
+	if alias.Year == nil {
+		return nil
+	}
+
 	for _, layout := range copyrightYearLayouts {
 		var date time.Time
-		date, err = time.Parse(layout, alias.Year)
+		date, err = time.Parse(layout, *alias.Year)
 		if err == nil {
 			c.Year = date.Year()
 			return nil
 		}
 	}
 
-	return fmt.Errorf("couldn't parse Copyright year: %s", alias.Year)
+	return fmt.Errorf("couldn't parse Copyright year: %s", *alias.Year)
 }
 
 // Read reads a new GPX from r.

@@ -639,32 +639,65 @@ func TestParseExamples(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestCopyrightTypeYear(t *testing.T) {
+func TestCopyright(t *testing.T) {
 	for i, tc := range []struct {
-		data []byte
-		year int
+		dataStr      string
+		copyrightErr bool
+		copyright    gpx.CopyrightType
 	}{
 		{
-			data: []byte("<copyright><year>2019Z</year></copyright>"),
-			year: 2019,
+			dataStr: `<copyright author="Author"/>`,
+			copyright: gpx.CopyrightType{
+				Author: "Author",
+			},
 		},
 		{
-			data: []byte("<copyright><year>2013</year></copyright>"),
-			year: 2013,
+			dataStr: "<copyright><year>2019Z</year></copyright>",
+			copyright: gpx.CopyrightType{
+				Year: 2019,
+			},
 		},
 		{
-			data: []byte("<copyright><year>2011+05:00</year></copyright>"),
-			year: 2011,
+			dataStr: "<copyright><year>2013</year></copyright>",
+			copyright: gpx.CopyrightType{
+				Year: 2013,
+			},
 		},
 		{
-			data: []byte("<copyright><year>2010-07:00</year></copyright>"),
-			year: 2010,
+			dataStr: "<copyright><year>2011+05:00</year></copyright>",
+			copyright: gpx.CopyrightType{
+				Year: 2011,
+			},
+		},
+		{
+			dataStr: "<copyright><year>2010-07:00</year></copyright>",
+			copyright: gpx.CopyrightType{
+				Year: 2010,
+			},
+		},
+		{
+			dataStr: `<copyright author=""><license>107344001197</license></copyright>`,
+			copyright: gpx.CopyrightType{
+				License: "107344001197",
+			},
+		},
+		{
+			dataStr:      "<copyright><year></year></copyright>",
+			copyrightErr: true,
+		},
+		{
+			dataStr:      "<copyright><year>invalid</year></copyright>",
+			copyrightErr: true,
 		},
 	} {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			var gotCopyright gpx.CopyrightType
-			assert.NoError(t, xml.Unmarshal(tc.data, &gotCopyright))
-			assert.Equal(t, tc.year, gotCopyright.Year)
+			if err := xml.Unmarshal([]byte(tc.dataStr), &gotCopyright); tc.copyrightErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tc.copyright, gotCopyright)
+			}
 		})
 	}
 }
