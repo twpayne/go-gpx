@@ -6,7 +6,7 @@ require (
 	github.com/alecthomas/assert/v2 v2.5.0
 	github.com/kr/pretty v0.3.1
 	github.com/twpayne/go-geom v1.5.3
-	golang.org/x/net v0.20.0
+	golang.org/x/net v0.23.0
 )
 
 require (
