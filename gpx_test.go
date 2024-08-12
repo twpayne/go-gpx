@@ -614,7 +614,9 @@ func TestTime(t *testing.T) {
 
 func TestParseExamples(t *testing.T) {
 	dir := "testdata"
-	err := fs.WalkDir(os.DirFS(dir), ".", func(filename string, d fs.DirEntry, errs error) error {
+	err := fs.WalkDir(os.DirFS(dir), ".", func(filename string, d fs.DirEntry, err error) error {
+		assert.NoError(t, err)
+
 		if d.IsDir() {
 			return nil
 		}
