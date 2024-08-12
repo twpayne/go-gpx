@@ -2,8 +2,6 @@ module github.com/twpayne/go-gpx
 
 go 1.21
 
-toolchain go1.22.2
-
 require (
 	github.com/alecthomas/assert/v2 v2.10.0
 	github.com/kr/pretty v0.3.1
