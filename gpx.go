@@ -15,7 +15,11 @@ import (
 	"golang.org/x/net/html/charset"
 )
 
-const timeLayout = time.RFC3339Nano
+const (
+	timeLayout = time.RFC3339Nano
+	http       = "http://"
+	https      = "https://"
+)
 
 // StartElement is the XML start element for GPX files.
 var StartElement = xml.StartElement{
@@ -196,10 +200,10 @@ func Read(r io.Reader) (*GPX, error) {
 
 // MarshalXML implements xml.Marshaler.MarshalXML.
 func (g *GPX) MarshalXML(e *xml.Encoder, _ xml.StartElement) error {
-	baseURL := "http://www.topografix.com/GPX/" + strings.Join(strings.Split(g.Version, "."), "/")
+	baseURL := "www.topografix.com/GPX/" + strings.Join(strings.Split(g.Version, "."), "/")
 	xmlSchemaLocations := append([]string{
-		baseURL,
-		baseURL + "/gpx.xsd",
+		http + baseURL,
+		https + baseURL + "/gpx.xsd",
 	}, g.XMLSchemaLocations...)
 	attr := []xml.Attr{
 		{
@@ -212,11 +216,11 @@ func (g *GPX) MarshalXML(e *xml.Encoder, _ xml.StartElement) error {
 		},
 		{
 			Name:  xml.Name{Local: "xmlns:xsi"},
-			Value: "http://www.w3.org/2001/XMLSchema-instance",
+			Value: http + "www.w3.org/2001/XMLSchema-instance",
 		},
 		{
 			Name:  xml.Name{Local: "xmlns"},
-			Value: baseURL,
+			Value: http + baseURL,
 		},
 		{
 			Name:  xml.Name{Local: "xsi:schemaLocation"},

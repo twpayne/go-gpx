@@ -13,7 +13,7 @@ import (
 func ExampleRead() {
 	r := bytes.NewBufferString(`
 		<?xml version="1.0" encoding="UTF-8"?>
-		<gpx version="1.0" creator="ExpertGPS 1.1 - http://www.topografix.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.topografix.com/GPX/1/0" xsi:schemaLocation="http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd">
+		<gpx version="1.1" creator="ExpertGPS 1.1 - http://www.topografix.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.topografix.com/GPX/1/1" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 https://www.topografix.com/GPX/1/1/gpx.xsd">
 		  <wpt lat="42.438878" lon="-71.119277">
 			<ele>44.586548</ele>
 			<speed>9.16</speed>
@@ -37,7 +37,7 @@ func ExampleRead() {
 
 func ExampleGPX_WriteIndent() {
 	g := &gpx.GPX{
-		Version: "1.0",
+		Version: "1.1",
 		Creator: "ExpertGPS 1.1 - http://www.topografix.com",
 		Wpt: []*gpx.WptType{
 			{
@@ -60,7 +60,7 @@ func ExampleGPX_WriteIndent() {
 	}
 	// Output:
 	// <?xml version="1.0" encoding="UTF-8"?>
-	// <gpx version="1.0" creator="ExpertGPS 1.1 - http://www.topografix.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.topografix.com/GPX/1/0" xsi:schemaLocation="http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd">
+	// <gpx version="1.1" creator="ExpertGPS 1.1 - http://www.topografix.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.topografix.com/GPX/1/1" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 https://www.topografix.com/GPX/1/1/gpx.xsd">
 	//   <wpt lat="42.438878" lon="-71.119277">
 	//     <ele>44.586548</ele>
 	//     <time>2001-11-28T21:05:28Z</time>

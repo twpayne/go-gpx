@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <gpx
- version="1.0"
+ version="1.1"
  creator="ExpertGPS 1.1 - http://www.topografix.com"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xmlns="http://www.topografix.com/GPX/1/0"
- xsi:schemaLocation="http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd">
+ xmlns="http://www.topografix.com/GPX/1/1"
+ xsi:schemaLocation="http://www.topografix.com/GPX/1/1 https://www.topografix.com/GPX/1/1/gpx.xsd">
 <time>2002-02-27T17:18:33Z</time>
 <bounds minlat="42.401051" minlon="-71.126602" maxlat="42.468655" maxlon="-71.102973"/>
 <wpt lat="42.438878" lon="-71.119277">
