@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
 <?xml-stylesheet type="text/xsl" href="details.xsl"?>
 <gpx
- version="1.0"
+ version="1.1"
  creator="ExpertGPS 1.1.1 - http://www.topografix.com"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xmlns="http://www.topografix.com/GPX/1/0"
+ xmlns="http://www.topografix.com/GPX/1/1"
  xmlns:topografix="http://www.topografix.com/GPX/Private/TopoGrafix/0/1"
- xsi:schemaLocation="http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd http://www.topografix.com/GPX/Private/TopoGrafix/0/1 http://www.topografix.com/GPX/Private/TopoGrafix/0/1/topografix.xsd">
+ xsi:schemaLocation="http://www.topografix.com/GPX/1/1 https://www.topografix.com/GPX/1/1/gpx.xsd http://www.topografix.com/GPX/Private/TopoGrafix/0/1 https://www.topografix.com/GPX/Private/TopoGrafix/0/1/topografix.xsd">
 <name><![CDATA[Rockbuster Duathlon at Ashland State Park]]></name>
 <desc><![CDATA[Team TopoGrafix tracklogs from the Rockbuster Duathlon at Ashland State Park, April 21st, 2002.  The course consisted of a two-mile run, an seven mile mountain bike course, and a final two-mile run.
 
