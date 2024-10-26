@@ -1,5 +1,5 @@
 run:
-  go: '1.19'
+  go: '1.22'
 
 linters:
   enable:
@@ -7,18 +7,21 @@ linters:
   - asciicheck
   - bidichk
   - bodyclose
+  - canonicalheader
   - containedctx
   - contextcheck
+  - copyloopvar
   - decorder
   - dogsled
   - dupword
   - durationcheck
+  - err113
   - errcheck
   - errchkjson
   - errname
   - errorlint
   - exhaustive
-  - exportloopref
+  - fatcontext
   - forbidigo
   - forcetypeassert
   - gci
@@ -31,7 +34,6 @@ linters:
   - gocyclo
   - godot
   - godox
-  - err113
   - gofmt
   - gofumpt
   - goheader
@@ -48,6 +50,7 @@ linters:
   - inamedparam
   - ineffassign
   - interfacebloat
+  - intrange
   - ireturn
   - loggercheck
   - maintidx
@@ -72,11 +75,14 @@ linters:
   - revive
   - rowserrcheck
   - sloglint
+  - spancheck
   - sqlclosecheck
   - staticcheck
   - stylecheck
+  - tagalign
   - tagliatelle
   - tenv
+  - testifylint
   - testpackage
   - thelper
   - typecheck
@@ -87,10 +93,6 @@ linters:
   - wastedassign
   - whitespace
   - zerologlint
-  - canonicalheader
-  - fatcontext
-  - spancheck
-  - tagalign
   disable:
   - cyclop
   - depguard
