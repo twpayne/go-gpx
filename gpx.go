@@ -16,10 +16,11 @@ import (
 )
 
 const (
-	timeLayout = time.RFC3339Nano
-	http       = "http://"
-	https      = "https://"
+	http  = "http://"
+	https = "https://"
 )
+
+var timeLayout = time.RFC3339Nano
 
 // StartElement is the XML start element for GPX files.
 var StartElement = xml.StartElement{
@@ -190,12 +191,24 @@ func (c *CopyrightType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) err
 	return fmt.Errorf("couldn't parse Copyright year: %s", *alias.Year)
 }
 
+type ReadOption func()
+
 // Read reads a new GPX from r.
-func Read(r io.Reader) (*GPX, error) {
+func Read(r io.Reader, options ...ReadOption) (*GPX, error) {
+	for _, option := range options {
+		option()
+	}
 	gpx := &GPX{}
 	d := xml.NewDecoder(r)
 	d.CharsetReader = charset.NewReaderLabel
 	return gpx, d.Decode(gpx)
+}
+
+// WithTimeLayout applies a custom time layout for the decoding of the GPX source.
+func WithTimeLayout(layout string) ReadOption {
+	return func() {
+		timeLayout = layout
+	}
 }
 
 // MarshalXML implements xml.Marshaler.MarshalXML.
