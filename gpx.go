@@ -5,6 +5,7 @@ package gpx
 
 import (
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"strconv"
@@ -20,7 +21,10 @@ const (
 	https = "https://"
 )
 
-var timeLayout = time.RFC3339Nano
+var timeLayouts = []string{
+	time.RFC3339Nano,
+	"2006-01-02T15:04:05.999999999",
+}
 
 // StartElement is the XML start element for GPX files.
 var StartElement = xml.StartElement{
@@ -32,6 +36,8 @@ var copyrightYearLayouts = []string{
 	"2006Z",
 	"2006-07:00",
 }
+
+var errNoTimeLayout = errors.New("no time layout")
 
 // A BoundsType is a boundsType.
 type BoundsType struct {
@@ -207,7 +213,15 @@ func Read(r io.Reader, options ...ReadOption) (*GPX, error) {
 // WithTimeLayout applies a custom time layout for the decoding of the GPX source.
 func WithTimeLayout(layout string) ReadOption {
 	return func() {
-		timeLayout = layout
+		timeLayouts = []string{layout}
+	}
+}
+
+// WithTimeLayouts applies a custom time layouts for the decoding of the GPX
+// source.
+func WithTimeLayouts(layouts []string) ReadOption {
+	return func() {
+		timeLayouts = layouts
 	}
 }
 
@@ -278,6 +292,43 @@ func (g *GPX) WriteIndent(w io.Writer, prefix, indent string) error {
 	e := xml.NewEncoder(w)
 	e.Indent(prefix, indent)
 	return e.EncodeElement(g, StartElement)
+}
+
+// UnmarshalXML implements xml.Unmarshaler.UnmarshalXML.
+func (m *MetadataType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	var e struct {
+		Name       string          `xml:"name"`
+		Desc       string          `xml:"desc"`
+		Author     *PersonType     `xml:"author"`
+		Copyright  *CopyrightType  `xml:"copyright"`
+		Link       []*LinkType     `xml:"link"`
+		Time       string          `xml:"time"`
+		Keywords   string          `xml:"keywords"`
+		Bounds     *BoundsType     `xml:"bounds"`
+		Extensions *ExtensionsType `xml:"extensions"`
+	}
+	if err := d.DecodeElement(&e, &start); err != nil {
+		return err
+	}
+	mt := MetadataType{
+		Name:       e.Name,
+		Desc:       e.Desc,
+		Author:     e.Author,
+		Copyright:  e.Copyright,
+		Link:       e.Link,
+		Keywords:   e.Keywords,
+		Bounds:     e.Bounds,
+		Extensions: e.Extensions,
+	}
+	if e.Time != "" {
+		t, err := parseTime(e.Time)
+		if err != nil {
+			return err
+		}
+		mt.Time = t
+	}
+	*m = mt
+	return nil
 }
 
 // NewRteType returns a new RteType with geometry g.
@@ -386,7 +437,7 @@ func (w *WptType) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 		return err
 	}
 	if !w.Time.IsZero() {
-		if err := maybeEmitStringElement(e, "time", w.Time.UTC().Format(timeLayout)); err != nil {
+		if err := maybeEmitStringElement(e, "time", w.Time.UTC().Format(timeLayouts[0])); err != nil {
 			return err
 		}
 	}
@@ -505,7 +556,7 @@ func (w *WptType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 		Extensions:    e.Extensions,
 	}
 	if e.Time != "" {
-		t, err := time.ParseInLocation(timeLayout, e.Time, time.UTC)
+		t, err := parseTime(e.Time)
 		if err != nil {
 			return err
 		}
@@ -600,4 +651,17 @@ func newWptTypes(g *geom.LineString) []*WptType {
 		wpts[i] = wpt
 	}
 	return wpts
+}
+
+func parseTime(value string) (time.Time, error) {
+	firstErr := errNoTimeLayout
+	for i, timeLayout := range timeLayouts {
+		switch t, err := time.Parse(timeLayout, value); {
+		case err == nil:
+			return t, nil
+		case i == 0:
+			firstErr = err
+		}
+	}
+	return time.Time{}, firstErr
 }

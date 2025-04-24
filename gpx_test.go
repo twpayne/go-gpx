@@ -17,6 +17,42 @@ import (
 	gpx "github.com/twpayne/go-gpx"
 )
 
+func TestMetadata(t *testing.T) {
+	for _, tc := range []struct {
+		name     string
+		data     string
+		expected *gpx.MetadataType
+	}{
+		{
+			name: "rfc3339",
+			data: `<metadata><time>2004-04-12T13:20:00Z</time></metadata>`,
+			expected: &gpx.MetadataType{
+				Time: time.Date(2004, 4, 12, 13, 20, 0, 0, time.UTC),
+			},
+		},
+		{
+			name: "rfc3339_without_timezone",
+			data: `<metadata><time>2004-04-12T13:20:00</time></metadata>`,
+			expected: &gpx.MetadataType{
+				Time: time.Date(2004, 4, 12, 13, 20, 0, 0, time.UTC),
+			},
+		},
+		{
+			name: "rfc3339_with_milliseconds_without_timezone",
+			data: `<metadata><time>2004-04-12T13:20:00.123</time></metadata>`,
+			expected: &gpx.MetadataType{
+				Time: time.Date(2004, 4, 12, 13, 20, 0, 123000000, time.UTC),
+			},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var gotMetadata gpx.MetadataType
+			assert.NoError(t, xml.Unmarshal([]byte(tc.data), &gotMetadata))
+			assert.Equal(t, tc.expected, &gotMetadata)
+		})
+	}
+}
+
 func TestWpt(t *testing.T) {
 	for i, tc := range []struct {
 		data          string
